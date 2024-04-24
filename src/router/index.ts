@@ -4,7 +4,12 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'default',
-    component: import('../components/HelloWorld.vue')
+    redirect: { name: 'login' }
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: import('../views/LoginView.vue')
   }
 ];
 
