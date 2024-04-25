@@ -31,7 +31,7 @@
       </div>
       <div class="home-main-container">
         <div class="home-sider">
-          <el-menu default-active="1" class="el-menu-vertical" :default-openeds="['class', 'system', 'data']"
+          <el-menu default-active="/home/class" class="el-menu-vertical" :default-openeds="['class', 'system', 'data']"
             :router="true">
             <el-sub-menu index="class">
               <template #title>
@@ -144,6 +144,7 @@ import { EditPen, SwitchButton, ChromeFilled } from '@element-plus/icons-vue';
 }
 
 .home-main {
-  width: calc(100vh - 200px);
+  width: calc(100% - 200px);
+  height: inherit;
 }
 </style>
