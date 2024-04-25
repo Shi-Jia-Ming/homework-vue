@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-image-container">
-      <img class="login-image" src="../assets/login.png">
+      <img class="login-image" src="../assets/login.png" width="517px">
     </div>
     <div class="login-form-container">
       <div class="login-title">
@@ -43,6 +43,10 @@ const loginForm: {
 .login-container {
   display: flex;
   flex-direction: row;
+  width: 1017px;
+  height: 550px;
+  margin: auto;
+  padding: 90px;
 }
 
 .login-form-container {
