@@ -1,13 +1,18 @@
 <template>
-  <div class='app'>
+  <el-config-provider :locale="locale" class="app">
     <router-view />
-  </div>
+  </el-config-provider>
 </template>
+
+<script setup lang="ts">
+import zhCn from 'element-plus/es/locale/lang/zh-cn';
+const locale = zhCn;
+</script>
 
 <style lang="scss">
 html,
 body,
-div#app,
+#app,
 .app {
   padding: 0;
   margin: 0;
