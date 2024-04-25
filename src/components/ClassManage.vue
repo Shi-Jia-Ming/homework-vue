@@ -23,7 +23,7 @@
     <div class="add-btn-container">
       <el-button type="primary" class="add-btn">
         <template #icon>
-          <el-icon>
+          <el-icon :size="15" style="margin-right: 5px;">
             <plus />
           </el-icon>
           <p>新增班级</p>
