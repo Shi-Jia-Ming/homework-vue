@@ -47,7 +47,7 @@
       </el-button>
     </div>
     <div class="student-table-container">
-      <el-table stripe style="width: 100%" height="350" class="student-table">
+      <el-table stripe style="width: 100%" class="student-table">
         <el-table-column type="selection" width="55" />
         <el-table-column fixed="left" prop="name" label="姓名" width="170" />
         <el-table-column prop="number" label="学号" width="170" />
@@ -94,6 +94,7 @@ import { Plus, Minus } from '@element-plus/icons-vue';
   display: flex;
   flex-direction: column;
   padding: 20px;
+  height: calc(100% - 56px);
 }
 
 .student-manage-title-container {
@@ -139,7 +140,12 @@ import { Plus, Minus } from '@element-plus/icons-vue';
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+  width: 90%;
   margin-top: 20px;
+}
+
+.student-table {
+  height: 100%;
 }
 
 .page-configuraiton {

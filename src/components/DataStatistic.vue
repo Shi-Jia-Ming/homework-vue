@@ -3,23 +3,23 @@
     <div class="data-statistic-title-container">
       <p class="data-statistic-title">员工信息统计</p>
     </div>
-  </div>
-  <div class="data-charts">
-    <div class="gender-statistic-container">
-      <div class="gender-statistic-title">
-        <p>员工性别统计</p>
+    <div class="data-charts">
+      <div class="gender-statistic-container">
+        <div class="gender-statistic-title">
+          <p>员工性别统计</p>
+        </div>
+        <div class="post-statistic-chart">
+          <div id="gender" class="gender-statistic-chart"></div>
+        </div>
       </div>
-      <div class="post-statistic-chart">
-        <div id="gender" class="gender-statistic-chart"></div>
-      </div>
-    </div>
-    <el-divider direction="vertical" class="divider"/>
-    <div class="post-statistic-container">
-      <div class="post-statistic-title">
-        <p>员工职位统计</p>
-      </div>
-      <div class="post-statistic-chart-container">
-        <div id="post" class="post-statistic-chart"></div>
+      <el-divider direction="vertical" class="divider" />
+      <div class="post-statistic-container">
+        <div class="post-statistic-title">
+          <p>员工职位统计</p>
+        </div>
+        <div class="post-statistic-chart-container">
+          <div id="post" class="post-statistic-chart"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -81,7 +81,7 @@ const initGenderStatistic = (): void => {
 const initPostStatistic = (): void => {
   type EChartsOption = echarts.EChartsOption;
 
-  var chartDom = document.getElementById('post')!;
+  var chartDom = document.getElementById('post');
   var myChart = echarts.init(chartDom);
   var option: EChartsOption;
 
@@ -110,6 +110,8 @@ const initPostStatistic = (): void => {
   display: flex;
   flex-direction: column;
   padding: 20px;
+  margin: auto;
+  height: calc(100% - 56px);
 }
 
 .data-statistic-title-container {
@@ -128,18 +130,18 @@ const initPostStatistic = (): void => {
 .data-charts {
   display: flex;
   flex-direction: row;
+  height: calc(100% - 35px);
+  justify-content: center;
+  align-items: center;
 }
 
 .gender-statistic-container,
 .post-statistic-container {
   margin: 20px;
   width: 45%;
-  height: 550px;
-  // border: 1px black solid;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
 .gender-statistic-title,
@@ -148,15 +150,20 @@ const initPostStatistic = (): void => {
   font-weight: 400;
 }
 
+.gender-statistic-chart-container,
+.post-statistic-chart-container,
 .gender-statistic-chart,
 .post-statistic-chart {
-  width: 400px;
-  height: 400px;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  align-self: center;
 }
 
 .divider {
   margin: 80px 0;
-  height: 410px;
+  height: 80%;
 }
-
 </style>
