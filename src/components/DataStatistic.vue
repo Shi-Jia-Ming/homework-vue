@@ -151,14 +151,23 @@ const initPostStatistic = (): void => {
 }
 
 .gender-statistic-chart-container,
-.post-statistic-chart-container,
+.post-statistic-chart-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .gender-statistic-chart,
 .post-statistic-chart {
   width: 100%;
-  height: 100%;
+  height: 80%;
+  align-self: center;
 }
 
 canvas {
+  height: 100%;
+  width: 100%;
   align-self: center;
 }
 

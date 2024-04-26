@@ -113,7 +113,7 @@ import { Plus, Minus } from '@element-plus/icons-vue';
 .search-group {
   align-self: flex-start;
   margin-top: 30px;
-  width: 100%;
+  // width: 100%;
 }
 
 .el-form-item__label {
@@ -122,7 +122,7 @@ import { Plus, Minus } from '@element-plus/icons-vue';
 }
 
 .search-btn {
-  margin-left: 50px;
+  margin-left: 10px;
   width: 100px;
 }
 
