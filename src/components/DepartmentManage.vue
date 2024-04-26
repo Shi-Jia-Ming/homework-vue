@@ -14,7 +14,7 @@
       </el-button>
     </div>
     <div class="department-table-container">
-      <el-table stripe style="width: 100%" height="500" class="department-table">
+      <el-table stripe style="width: 100%" class="department-table">
         <el-table-column prop="index" label="序号" width="180" />
         <el-table-column prop="name" label="部门名称" width="180" />
         <el-table-column prop="updatedAt" label="最后操作时间" width="180" />
@@ -42,6 +42,7 @@ import { Plus } from '@element-plus/icons-vue';
   display: flex;
   flex-direction: column;
   padding: 20px;
+  height: 100%;
 }
 
 .department-manage-title-container {
@@ -72,6 +73,12 @@ import { Plus } from '@element-plus/icons-vue';
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+  width: 180 * 4px;
+  max-width: 90%;
   margin-top: 20px;
+}
+
+.department-table {
+  height: 80%;
 }
 </style>

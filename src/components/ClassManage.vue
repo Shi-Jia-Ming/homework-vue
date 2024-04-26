@@ -31,7 +31,7 @@
       </el-button>
     </div>
     <div class="class-table-container">
-      <el-table stripe style="width: 100%" height="350" class="class-table">
+      <el-table stripe style="width: 100%" class="class-table">
         <el-table-column prop="index" label="序号" width="170" />
         <el-table-column prop="name" label="班级名称" width="170" />
         <el-table-column prop="startTime" label="开课时间" width="170" />
@@ -73,6 +73,7 @@ import { Plus } from '@element-plus/icons-vue';
   display: flex;
   flex-direction: column;
   padding: 20px;
+  height: calc(100% - 56px);
 }
 
 .class-manage-title-container {
@@ -122,7 +123,13 @@ import { Plus } from '@element-plus/icons-vue';
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+  width: 170 * 6px;
+  max-width: 90%;
   margin-top: 20px;
+}
+
+.class-table {
+  height: 100%;
 }
 
 .page-configuraiton {

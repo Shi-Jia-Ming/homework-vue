@@ -9,37 +9,38 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
     name: 'login',
-    component: import('../views/LoginView.vue')
+    component: () => import('../views/LoginView.vue')
   },
   {
     path: '/home',
     name: 'home',
-    component: import('../views/HomeView.vue'),
+    component: () => import('../views/HomeView.vue'),
+    redirect: '/home/class',
     children: [
       {
         path: 'class',
         name: 'class manage',
-        component: import('../components/ClassManage.vue')
+        component: () => import('../components/ClassManage.vue')
       },
       {
         path: 'student',
         name: 'student manage',
-        component: import('../components/StudentManage.vue')
+        component: () => import('../components/StudentManage.vue')
       },
       {
         path: 'department',
         name: 'department manage',
-        component: import('../components/DepartmentManage.vue')
+        component: () => import('../components/DepartmentManage.vue')
       },
       {
         path: 'staff',
         name: 'staff manage',
-        component: import('../components/StaffManage.vue')
+        component: () => import('../components/StaffManage.vue')
       },
       {
         path: 'statistic',
         name: 'data statistic',
-        component: import('../components/DataStatistic.vue')
+        component: () => import('../components/DataStatistic.vue')
       }
     ]
   }
