@@ -1,26 +1,28 @@
 <template>
-  <div class="login-container">
-    <div class="login-image-container">
-      <img class="login-image" src="../assets/login.png" width="517px">
-    </div>
-    <div class="login-form-container">
-      <div class="login-title">
-        培训管理系统
+  <div class="login-layout">
+    <div class="login-container">
+      <div class="login-image-container">
+        <img class="login-image" src="../assets/login.png" width="517px">
       </div>
-      <el-form class="login-form" :model="loginForm" label-position="right" label-width="auto" size="large">
-        <el-form-item label="用户名" class="username-item">
-          <el-input class="input" placeholder="请输入员工用户名"/>
-        </el-form-item>
-        <el-form-item label="密&nbsp; &nbsp; 码" class="password-item">
-          <el-input class="input" placeholder="作品展示PPT"/>
-        </el-form-item>
-        <el-form-item class="btn-group-item">
-          <div class="btn-group">
-            <el-button type="primary" class="login-btn">登录</el-button>
-            <el-button type="info" class="cancel-btn">取消</el-button>
-          </div>
-        </el-form-item>
-      </el-form>
+      <div class="login-form-container">
+        <div class="login-title">
+          培训管理系统
+        </div>
+        <el-form class="login-form" :model="loginForm" label-position="right" label-width="auto" size="large">
+          <el-form-item label="用户名" class="username-item">
+            <el-input class="input" placeholder="请输入员工用户名" />
+          </el-form-item>
+          <el-form-item label="密&nbsp; &nbsp; 码" class="password-item">
+            <el-input class="input" placeholder="作品展示PPT" />
+          </el-form-item>
+          <el-form-item class="btn-group-item">
+            <div class="btn-group">
+              <el-button type="primary" class="login-btn">登录</el-button>
+              <el-button type="info" class="cancel-btn">取消</el-button>
+            </div>
+          </el-form-item>
+        </el-form>
+      </div>
     </div>
   </div>
 </template>
@@ -40,12 +42,20 @@ const loginForm: {
 </script>
 
 <style lang="scss">
+.login-layout {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .login-container {
   display: flex;
   flex-direction: row;
   width: 1017px;
   height: 550px;
-  margin: auto;
+  margin: auto auto;
   padding: 90px;
 }
 

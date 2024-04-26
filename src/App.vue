@@ -1,7 +1,9 @@
 <template>
-  <el-config-provider :locale="locale" class="app">
-    <router-view />
-  </el-config-provider>
+  <div class="app-container">
+    <el-config-provider :locale="locale">
+      <router-view />
+    </el-config-provider>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -13,7 +15,7 @@ const locale = zhCn;
 html,
 body,
 #app,
-.app {
+.app-container {
   padding: 0;
   margin: 0;
   width: 100%;

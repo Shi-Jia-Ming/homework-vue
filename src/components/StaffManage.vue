@@ -43,7 +43,7 @@
       </el-button>
     </div>
     <div class="staff-table-container">
-      <el-table stripe style="width: 100%" height="350" class="staff-table">
+      <el-table stripe style="width: 100%" class="staff-table">
         <el-table-column type="selection" width="55" />
         <el-table-column fixed="left" prop="name" label="姓名" width="170" />
         <el-table-column prop="acatar" label="图像" width="170" />
@@ -87,6 +87,7 @@ import { Plus, Minus } from '@element-plus/icons-vue';
   display: flex;
   flex-direction: column;
   padding: 20px;
+  height: calc(100% - 56px);
 }
 
 .staff-manage-title-container {
@@ -132,7 +133,13 @@ import { Plus, Minus } from '@element-plus/icons-vue';
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+  width: (170 * 7 + 55)px;
+  max-width: 90%;
   margin-top: 20px;
+}
+
+.staff-table {
+  height: 100%;
 }
 
 .page-configuraiton {
