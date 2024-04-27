@@ -8,17 +8,18 @@
         <div class="login-title">
           培训管理系统
         </div>
-        <el-form class="login-form" :model="loginForm" label-position="right" label-width="auto" size="large">
-          <el-form-item label="用户名" class="username-item">
-            <el-input class="input" placeholder="请输入员工用户名" />
+        <el-form class="login-form" :model="loginForm" label-position="right" label-width="auto" size="large"
+          ref="loginFormRef" :rules="rules">
+          <el-form-item label="用户名" class="username-item" prop="username" :error="formErrMsg.usernameErr">
+            <el-input class="input" placeholder="请输入员工用户名" v-model="loginForm.username" />
           </el-form-item>
-          <el-form-item label="密&nbsp; &nbsp; 码" class="password-item">
-            <el-input class="input" placeholder="作品展示PPT" />
+          <el-form-item label="密&nbsp; &nbsp; 码" class="password-item" prop="password" :error="formErrMsg.passwordErr">
+            <el-input class="input" placeholder="作品展示PPT" v-model="loginForm.password" />
           </el-form-item>
           <el-form-item class="btn-group-item">
             <div class="btn-group">
-              <el-button type="primary" class="login-btn">登录</el-button>
-              <el-button type="info" class="cancel-btn">取消</el-button>
+              <el-button type="primary" class="login-btn" @click="login(loginFormRef)">登录</el-button>
+              <el-button type="info" class="cancel-btn" @click="reset(loginFormRef)">重置</el-button>
             </div>
           </el-form-item>
         </el-form>
@@ -28,9 +29,15 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { Ref, reactive, ref } from 'vue';
+import SpringAPI from '../utils/request';
+import { FormRules, type FormInstance } from 'element-plus';
+import router from '../router';
 
+// el-form 控制器
+const loginFormRef: Ref = ref<FormInstance>();
 
+// 登录表单
 const loginForm: {
   username: string,
   password: string
@@ -38,6 +45,71 @@ const loginForm: {
   username: '',
   password: ''
 });
+
+// 登录验证的错误信息
+const formErrMsg: {
+  usernameErr: string,
+  passwordErr: string
+} = reactive({
+  usernameErr: '',
+  passwordErr: ''
+});
+
+// 用户名验证
+const validateUsername = (_rule: any, value: string, callback: Function) => {
+  if (value === '') {
+    callback(new Error("用户名不能为空"));
+  } else {
+    callback();
+  }
+}
+
+// 密码验证
+const validatePassword = (_rule: any, value: string, callback: Function) => {
+  if (value === '') {
+    callback(new Error("密码不能为空"));
+  } else {
+    callback();
+  }
+}
+
+const rules = reactive<FormRules<typeof loginForm>>({
+  username: [{ validator: validateUsername, trigger: 'blur' }],
+  password: [{ validator: validatePassword, trigger: 'blur' }]
+});
+
+// 登录函数
+const login = (formEl: FormInstance | undefined): undefined | boolean => {
+  if (!formEl) return;
+  formEl.validate((isValid: boolean) => {
+    if (isValid) {
+      console.log("表单验证通过");
+
+      // 向后端发送请求进行登录验证
+      SpringAPI.login(loginForm).then((result: Map<string, Object>) => {
+        if (result.get("msg") === "未查询到该用户") {
+          formErrMsg.usernameErr = result.get("msg") as string;
+          formErrMsg.passwordErr = '';
+        } else if (result.get("code") === 1) {
+          formErrMsg.passwordErr = result.get("msg") as string;
+          formErrMsg.usernameErr = '';
+        } else {
+          // 登录成功
+          router.push("/home");
+        }
+      })
+    } else {
+      console.log("登录失败");
+      return false;
+    }
+  })
+}
+
+// 重置表单
+const reset = (formEl: FormInstance | undefined): void => {
+  if (!formEl) return;
+  formEl.resetFields()
+}
 
 </script>
 
@@ -82,6 +154,10 @@ const loginForm: {
 
 .el-form-item__label {
   font-size: 16px;
+}
+
+.el-form-item__error {
+  margin-left: 30px;
 }
 
 .input {
