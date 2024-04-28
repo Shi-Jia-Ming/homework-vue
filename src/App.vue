@@ -8,7 +8,17 @@
 
 <script setup lang="ts">
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
+import { onMounted } from 'vue';
+import { Store, useStore } from 'vuex';
+import CookieAPI from './utils/cookie';
+
 const locale = zhCn;
+
+const store: Store<any> = useStore();
+
+onMounted(() => {
+  store.replaceState(CookieAPI.getCookie('vuexState'));
+})
 </script>
 
 <style lang="scss">

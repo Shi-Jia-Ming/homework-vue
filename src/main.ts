@@ -5,6 +5,11 @@ import App from './App.vue';
 import router from './router';
 // 注册用户全局状态
 import store from './store';
+import CookieAPI from './utils/cookie';
+
+
+// 保存状态信息
+CookieAPI.setCookie("vuexState", store.state);
 
 const app = createApp(App);
 app.use(router);
