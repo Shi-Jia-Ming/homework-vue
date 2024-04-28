@@ -14,10 +14,10 @@
       </el-button>
     </div>
     <div class="department-table-container">
-      <el-table stripe style="width: 100%" class="department-table">
-        <el-table-column prop="index" label="序号" width="180" />
+      <el-table stripe class="department-table" :data="departmentList">
+        <el-table-column prop="id" label="序号" width="180" />
         <el-table-column prop="name" label="部门名称" width="180" />
-        <el-table-column prop="updatedAt" label="最后操作时间" width="180" />
+        <el-table-column prop="updateAt" label="最后操作时间" width="320" />
         <el-table-column fixed="right" label="操作" width="180">
           <template #default>
             <el-button link type="primary" size="small">
@@ -35,6 +35,42 @@
 
 <script setup lang="ts">
 import { Plus } from '@element-plus/icons-vue';
+import { ComputedRef, computed, onMounted, reactive } from 'vue';
+import { Store, useStore } from 'vuex';
+import SpringAPI from '../utils/request';
+import Department from '../types/department';
+
+// 用户全局状态
+const store: Store<any> = useStore();
+
+// 部门信息列表
+const departmentList: Array<Department> = reactive([]);
+
+// 定义用户信息
+const userId: ComputedRef<number> = computed(() => { return store.state.user.userId });
+const token: ComputedRef<string> = computed(() => { return store.state.user.token });
+const username: ComputedRef<string> = computed(() => { return store.state.user.username });
+
+onMounted(() => {
+  getDepartmentList();
+});
+
+// 获取部门信息列表
+const getDepartmentList = (): void => {
+  SpringAPI.getDepartmentList(token.value, userId.value, username.value)
+    .then((result: Map<string, Object>) => {
+      if (result.get("code") === 0) {
+        const departments: Array<Department> = result.get("departmentList") as Array<Department>;
+        departments.forEach((department: Department) => {
+          department.updateAt = new Date(department.updateAt).toLocaleString();
+          departmentList.push(department);
+        })
+        console.log("获取部门信息列表成功，列表数据: ", departmentList);
+      } else {
+        console.log("获取部门信息列表失败");
+      }
+    })
+}
 </script>
 
 <style lang="scss">
@@ -73,12 +109,14 @@ import { Plus } from '@element-plus/icons-vue';
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
-  width: 180 * 4px;
+  width: (180 * 3 + 320)px;
   max-width: 90%;
   margin-top: 20px;
 }
 
 .department-table {
+  display: flex;
+  justify-content: flex-start;
   height: 80%;
 }
 </style>
