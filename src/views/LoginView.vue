@@ -32,10 +32,17 @@
 import { Ref, reactive, ref } from 'vue';
 import SpringAPI from '../utils/request';
 import { FormRules, type FormInstance } from 'element-plus';
-import router from '../router';
+import { Store, useStore } from 'vuex';
+import { Router, useRouter } from 'vue-router';
 
 // el-form 控制器
 const loginFormRef: Ref = ref<FormInstance>();
+
+// 用户全局状态
+const userStore: Store<any> = useStore();
+
+// 路由控制器
+const router: Router = useRouter();
 
 // 登录表单
 const loginForm: {
@@ -73,6 +80,7 @@ const validatePassword = (_rule: any, value: string, callback: Function) => {
   }
 }
 
+// 登录验证规则
 const rules = reactive<FormRules<typeof loginForm>>({
   username: [{ validator: validateUsername, trigger: 'blur' }],
   password: [{ validator: validatePassword, trigger: 'blur' }]
@@ -86,16 +94,22 @@ const login = (formEl: FormInstance | undefined): undefined | boolean => {
       console.log("表单验证通过");
 
       // 向后端发送请求进行登录验证
-      SpringAPI.login(loginForm).then((result: Map<string, Object>) => {
+      SpringAPI.login(loginForm).then((result: Map<string, Object>): boolean | undefined => {
         if (result.get("msg") === "未查询到该用户") {
           formErrMsg.usernameErr = result.get("msg") as string;
           formErrMsg.passwordErr = '';
+          return false;
         } else if (result.get("code") === 1) {
           formErrMsg.passwordErr = result.get("msg") as string;
           formErrMsg.usernameErr = '';
+          return false;
         } else {
-          // 登录成功
-          router.push("/home");
+          // 登录成功，设置用户全局状态          
+          userStore.commit('user/setUserId', result.get("id"));
+          userStore.commit('user/setToken', result.get("token"));
+          
+          // 路由跳转
+          router.push({ path: "/home" });
         }
       })
     } else {
@@ -108,7 +122,7 @@ const login = (formEl: FormInstance | undefined): undefined | boolean => {
 // 重置表单
 const reset = (formEl: FormInstance | undefined): void => {
   if (!formEl) return;
-  formEl.resetFields()
+  formEl.resetFields();
 }
 
 </script>
