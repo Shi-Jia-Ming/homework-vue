@@ -32,4 +32,15 @@ export default defineConfig({
       autoInstall: true,
     }),
   ],
+  // 解决跨域问题
+  server: {
+    host: 'localhost',
+    proxy: {
+      '/api': {
+        target: 'http://localhost:9999',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  }
 })
