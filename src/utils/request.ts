@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import Department from "../types/department";
 import Staff from "../types/staff";
 
-axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 export default class SpringAPI {
     // 后端 url
