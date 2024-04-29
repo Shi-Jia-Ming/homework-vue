@@ -88,6 +88,27 @@ export default class SpringAPI {
         return resultMap;
     }
 
+    public static editDeparment = async (token: string, id: number, username: string, department: Department): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/department/edit', {
+            username: username,
+            department: JSON.stringify(department)
+        }, {
+            headers: {
+                'Token': token,
+                'User-Id': id
+            }
+        })
+            .then((_response: AxiosResponse<string>) => {
+                resultMap.set("code", 0);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
     /**
      * 获取所有员工信息
      * 

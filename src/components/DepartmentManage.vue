@@ -23,8 +23,8 @@
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="180">
-          <template #default>
-            <el-button link type="primary" size="small">
+          <template #default="scope">
+            <el-button link type="primary" size="small" @click="openEditDialog(scope.row)">
               编辑
             </el-button>
             <el-button link type="primary" size="small">
@@ -43,12 +43,31 @@
         <div class="department-create-form-container">
           <div class="department-name-input-container">
             <span class="department-name-input-label">部门名称</span>
-            <el-input class="department-name-input" v-model="createDepartmentName"/>
+            <el-input class="department-name-input" v-model="createDepartmentName" />
           </div>
         </div>
         <div class="department-create-dialog-btn">
           <el-button type="primary" style="width: 150px; height: 40px;" @click="createDepartment">创建</el-button>
-          <el-button type="info" style="width: 150px; height: 40px;" @click="createDialogVisible = false;">取消</el-button>
+          <el-button type="info" style="width: 150px; height: 40px;"
+            @click="createDialogVisible = false;">取消</el-button>
+        </div>
+      </div>
+    </el-dialog>
+
+    <el-dialog v-model="editDialogVisible" width="800" draggable>
+      <div class="edit-dialog-layout">
+        <div class="department-edit-title-container">
+          <p class="department-edit-title">编辑部门信息</p>
+        </div>
+        <div class="department-edit-form-container">
+          <div class="department-name-input-container">
+            <span class="department-name-input-label">部门名称</span>
+            <el-input class="department-name-input" v-model="editDepartmentName" />
+          </div>
+        </div>
+        <div class="department-edit-dialog-btn">
+          <el-button type="primary" style="width: 150px; height: 40px;" @click="editDepartment">确认</el-button>
+          <el-button type="info" style="width: 150px; height: 40px;" @click="editDialogVisible = false;">取消</el-button>
         </div>
       </div>
     </el-dialog>
@@ -75,9 +94,15 @@ const username: ComputedRef<string> = computed(() => { return store.state.user.u
 
 // 新建部门窗口是否显示
 const createDialogVisible: Ref<boolean> = ref(false);
-
 // 新建部门的名称
 const createDepartmentName: Ref<string> = ref('');
+
+// 编辑部门窗口是否显示
+const editDialogVisible: Ref<boolean> = ref(false);
+// 编辑部门的名称
+const editDepartmentName: Ref<string> = ref('');
+// 编辑部门的对象
+const editDepartmentObject: Ref<Department | null> = ref(null);
 
 onMounted(() => {
   getDepartmentList();
@@ -103,25 +128,54 @@ const getDepartmentList = (): void => {
 const openCreateDialog = (): void => {
   createDialogVisible.value = true;
 }
+// 打开编辑部门的窗口
+const openEditDialog = (department: Department): void => {
+  editDepartmentObject.value = department;
+  editDepartmentName.value = department.name;
+  editDialogVisible.value = true;
+}
 
-// 新建窗口
+// 新建部门信息
 const createDepartment = (): void => {
   SpringAPI.createDepartment(token.value, userId.value, username.value, createDepartmentName.value)
-  .then((result: Map<string, Object>) => {
-    if (result.get("code") === 0) {
-      createDialogVisible.value = false;
-      const department: Department = new Department();
-      department.id = result.get("departmentId") as number;
-      department.name = createDepartmentName.value;
-      department.createAt = new Date();
-      department.updateAt = new Date();
-      departmentList.push(department);
-      console.log("创建部门成功");
-      createDepartmentName.value = '';
-    } else {
-      console.log("创建部门失败，信息：", result.get("msg") as string);
-    }
-  })
+    .then((result: Map<string, Object>) => {
+      if (result.get("code") === 0) {
+        createDialogVisible.value = false;
+        const department: Department = new Department();
+        department.id = result.get("departmentId") as number;
+        department.name = createDepartmentName.value;
+        department.createAt = new Date();
+        department.updateAt = new Date();
+        departmentList.push(department);
+        console.log("创建部门成功");
+        createDepartmentName.value = '';
+      } else {
+        console.log("创建部门失败，信息：", result.get("msg") as string);
+      }
+    })
+}
+// 编辑部门信息
+const editDepartment = (): void => {
+  // 新的部门信息
+  const newDepartment: Department = new Department();
+  newDepartment.id = editDepartmentObject.value?.id!;
+  newDepartment.name = editDepartmentName.value;
+  newDepartment.createAt = editDepartmentObject.value?.createAt!;
+  newDepartment.updateAt = new Date();
+  SpringAPI.editDeparment(token.value, userId.value, username.value, newDepartment)
+    .then((result: Map<string, Object>) => {
+      if (result.get("code") === 0) {
+        departmentList.forEach((department: Department) => {
+          if (department.id === editDepartmentObject.value?.id) {
+            department.name = editDepartmentName.value;
+          }
+        })
+        console.log("更新部门信息成功");
+        editDialogVisible.value = false;
+      } else {
+        console.log("更新部门失败，信息：", result.get("msg") as string);
+      }
+    })
 }
 </script>
 
