@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import Department from "../types/department";
+import Staff from "../types/staff";
 axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
 
 export default class SpringAPI {
@@ -30,6 +31,7 @@ export default class SpringAPI {
 
     /**
      * 获取所有部门信息
+     * 
      * @param token     用户 jwt 登录凭证
      * @param id        用户 id
      * @param username  用户名
@@ -37,7 +39,6 @@ export default class SpringAPI {
      */
     public static getDepartmentList = async (token: string, id: number, username: string): Promise<Map<string, Object>> => {
         const resultMap: Map<string, Object> = new Map();
-        axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
 
         await axios.post(this.url + '/department/getAll', { username: username }, {
             headers: {
@@ -48,6 +49,33 @@ export default class SpringAPI {
             .then((response: AxiosResponse<Array<Department>>) => {
                 resultMap.set("code", 0);
                 resultMap.set("departmentList", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 获取所有员工信息
+     * 
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @returns 返回员工信息列表
+     */
+    public static getStaffList = async (token: string, id: number, username: string): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/staff/getAll', { username: username }, {
+            headers: {
+                'Token': token,
+                'User-Id': id
+            }
+        })
+            .then((response: AxiosResponse<Array<Staff>>) => {
+                resultMap.set("code", 0);
+                resultMap.set("staff", response.data);
             }).catch((error: AxiosError) => {
                 resultMap.set("code", 1);
                 resultMap.set("msg", error.response?.data!);

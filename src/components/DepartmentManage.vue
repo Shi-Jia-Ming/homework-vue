@@ -78,7 +78,7 @@ const getDepartmentList = (): void => {
   display: flex;
   flex-direction: column;
   padding: 20px;
-  height: 100%;
+  height: calc(100% - 56px);
 }
 
 .department-manage-title-container {
@@ -108,7 +108,7 @@ const getDepartmentList = (): void => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
+  height: calc(100% - 150px);
   width: (180 * 3 + 320)px;
   max-width: 90%;
   margin-top: 20px;

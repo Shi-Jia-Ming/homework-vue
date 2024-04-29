@@ -43,14 +43,14 @@
       </el-button>
     </div>
     <div class="staff-table-container">
-      <el-table stripe style="width: 100%" class="staff-table">
+      <el-table stripe style="width: 100%" class="staff-table" :data="staffList">
         <el-table-column type="selection" width="55" />
         <el-table-column fixed="left" prop="name" label="姓名" width="170" />
-        <el-table-column prop="acatar" label="图像" width="170" />
+        <el-table-column prop="image" label="图像" width="170" />
         <el-table-column prop="gender" label="性别" width="170" />
-        <el-table-column prop="post" label="职位" width="170" />
-        <el-table-column prop="createdAt" label="入职日期" width="170" />
-        <el-table-column prop="updatedAt" label="最后操作时间" width="170" />
+        <el-table-column prop="job" label="职位" width="170" />
+        <el-table-column prop="entryDate" label="入职日期" width="170" />
+        <el-table-column prop="updateAt" label="最后操作时间" width="170" />
         <el-table-column fixed="right" label="操作" width="170">
           <template #default>
             <el-button link type="primary" size="small">
@@ -80,6 +80,47 @@
 
 <script setup lang="ts">
 import { Plus, Minus } from '@element-plus/icons-vue';
+import { ComputedRef, computed, onMounted, reactive } from 'vue';
+import { useStore, Store } from 'vuex';
+import Staff from '../types/staff';
+import SpringAPI from '../utils/request';
+
+// 员工信息列表
+const staffList: Array<Staff> = reactive([]);
+
+// 全局状态管理
+const store: Store<any> = useStore();
+
+// 定义用户信息
+const userId: ComputedRef<number> = computed(() => { return store.state.user.userId });
+const token: ComputedRef<string> = computed(() => { return store.state.user.token });
+const username: ComputedRef<string> = computed(() => { return store.state.user.username });
+
+onMounted(() => {
+  getStaffList();
+});
+
+// 获取员工信息列表
+const getStaffList = (): void => {
+  SpringAPI.getStaffList(token.value, userId.value, username.value)
+  .then((result: Map<string, Object>) => {
+    if (result.get("code") === 0) {
+      const staff: Array<Staff> = result.get("staff") as Array<Staff>;
+        staff.forEach((_staff: Staff) => {
+          _staff.gender = _staff.gender === 1 ? "男" : "女";
+          _staff.job = _staff.job === 1 ? "班主任" :
+          _staff.job === 2 ? "讲师" :
+          _staff.job === 3 ? "学工主管" :
+          _staff.job === 4 ? "教研主管" : 
+          _staff.job === 5 ? "咨询师" : ""
+          staffList.push(_staff);
+        })
+        console.log("获取员工信息列表成功，列表数据: ", staffList);
+    } else {
+      console.log("获取员工信息列表失败");
+    }
+  })
+}
 </script>
 
 <style lang="scss">
@@ -132,14 +173,16 @@ import { Plus, Minus } from '@element-plus/icons-vue';
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
+  height: calc(100% - 150px);
   width: (170 * 7 + 55)px;
   max-width: 90%;
   margin-top: 20px;
 }
 
 .staff-table {
-  height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  height: 80%;
 }
 
 .page-configuraiton {
