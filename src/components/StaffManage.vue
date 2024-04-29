@@ -43,7 +43,7 @@
       </el-button>
     </div>
     <div class="staff-table-container">
-      <el-table stripe style="width: 100%" class="staff-table" :data="staffList">
+      <el-table stripe style="width: 100%" class="staff-table" :data="listInTable">
         <el-table-column type="selection" width="55" />
         <el-table-column fixed="left" prop="name" label="姓名" width="170" />
         <el-table-column prop="image" label="图像" width="170">
@@ -91,13 +91,21 @@
       <div class="page-configuraiton">
         <div class="page-number-select">
           <p>每页展示的员工数：</p>
-          <el-select multiple placeholder="选择" style="width: 100px" v-model="pageNumber">
+          <el-select placeholder="选择" style="width: 100px" v-model="pageNumber">
             <el-option v-for="item in pageNumberList" :key="item" :label="item" :value="item" />
           </el-select>
         </div>
         <div class="page-select">
           <p>共{{ staffList.length }}条数据</p>
-          <el-pagination background layout="prev, pager, next, jumper" :total="10" class="pagination" />
+          <el-pagination 
+            background 
+            layout="prev, pager, next, jumper" 
+            :total="staffList.length" 
+            :page-size="Number(pageNumber)"
+            class="pagination"
+            v-model:current-page="page"
+            :default-current-page="1"
+          />
         </div>
       </div>
     </div>
@@ -114,11 +122,21 @@ import SpringAPI from '../utils/request';
 // 员工信息列表
 const staffList: Array<Staff> = reactive([]);
 
+// 表格上展示的信息列表
+const listInTable: ComputedRef<Array<Staff>> = computed(() => {  
+  const start: number = (page.value - 1) * Number(pageNumber.value);
+  const end: number = Math.min(page.value * Number(pageNumber.value), staffList.length);
+  return staffList.slice(start, end);
+});
+
 // 全局状态管理
 const store: Store<any> = useStore();
 
 // 每页展示的信息条数
-const pageNumber: Ref<number> = ref(10);
+const pageNumber: Ref<string> = ref('10');
+
+// 当前页数
+const page: Ref<number> = ref(1);
 
 // 每页可展示的信息数列表
 const pageNumberList: number[] = [10, 20, 50, 100];
@@ -208,7 +226,7 @@ const getStaffList = (): void => {
 .staff-table {
   display: flex;
   justify-content: flex-start;
-  height: 80%;
+  height: 80vh;
 }
 
 .page-configuraiton {

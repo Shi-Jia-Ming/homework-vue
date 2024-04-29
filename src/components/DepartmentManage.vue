@@ -120,6 +120,6 @@ const getDepartmentList = (): void => {
 .department-table {
   display: flex;
   justify-content: flex-start;
-  height: 80%;
+  height: 80vh;
 }
 </style>

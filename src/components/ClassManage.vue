@@ -129,7 +129,9 @@ import { Plus } from '@element-plus/icons-vue';
 }
 
 .class-table {
-  height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  height: 80vh;
 }
 
 .page-configuraiton {
