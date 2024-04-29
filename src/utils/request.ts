@@ -41,10 +41,11 @@ export default class SpringAPI {
     public static getDepartmentList = async (token: string, id: number, username: string): Promise<Map<string, Object>> => {
         const resultMap: Map<string, Object> = new Map();
 
-        await axios.post(this.url + '/department/getAll', { username: username }, {
+        await axios.get(this.url + '/department/getAll', {
             headers: {
                 'Token': token,
-                'User-Id': id
+                'User-Id': id,
+                'Username': username
             }
         })
             .then((response: AxiosResponse<Array<Department>>) => {
@@ -70,12 +71,12 @@ export default class SpringAPI {
         const resultMap: Map<string, Object> = new Map();
 
         await axios.post(this.url + '/department/create', {
-            username: username,
             departmentName: departmentName
         }, {
             headers: {
                 'Token': token,
-                'User-Id': id
+                'User-Id': id,
+                'Username': username
             }
         })
             .then((response: AxiosResponse<number>) => {
@@ -92,12 +93,12 @@ export default class SpringAPI {
         const resultMap: Map<string, Object> = new Map();
 
         await axios.post(this.url + '/department/edit', {
-            username: username,
             department: JSON.stringify(department)
         }, {
             headers: {
                 'Token': token,
-                'User-Id': id
+                'User-Id': id,
+                'Username': username
             }
         })
             .then((_response: AxiosResponse<string>) => {
@@ -120,10 +121,11 @@ export default class SpringAPI {
     public static getStaffList = async (token: string, id: number, username: string): Promise<Map<string, Object>> => {
         const resultMap: Map<string, Object> = new Map();
 
-        await axios.post(this.url + '/staff/getAll', { username: username }, {
+        await axios.get(this.url + '/staff/getAll', {
             headers: {
                 'Token': token,
-                'User-Id': id
+                'User-Id': id,
+                'Username': username
             }
         })
             .then((response: AxiosResponse<Array<Staff>>) => {
