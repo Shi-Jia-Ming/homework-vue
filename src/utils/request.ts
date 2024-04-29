@@ -18,7 +18,11 @@ export default class SpringAPI {
     public static login = async (loginForm: { username: string, password: string }): Promise<Map<string, Object>> => {
         const resultMap: Map<string, Object> = new Map();
         // 向后端发送请求
-        await axios.post(this.url + '/user/login', loginForm)
+        await axios.post(this.url + '/user/login', loginForm, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
             .then((response: AxiosResponse<{ id: number, token: string }>) => {
                 resultMap.set("code", 0);
                 resultMap.set("id", response.data.id);
