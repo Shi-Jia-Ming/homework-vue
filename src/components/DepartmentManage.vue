@@ -4,7 +4,7 @@
       <p class="department-manage-title">部门管理</p>
     </div>
     <div class="btn-container">
-      <el-button type="primary" class="add-department-btn">
+      <el-button type="primary" class="add-department-btn" @click="openCreateDialog">
         <template #icon>
           <el-icon :size="15" style="margin-right: 5px;">
             <plus />
@@ -34,12 +34,30 @@
         </el-table-column>
       </el-table>
     </div>
+
+    <el-dialog v-model="createDialogVisible" width="800" draggable>
+      <div class="create-dialog-layout">
+        <div class="department-create-title-container">
+          <p class="department-create-title">新建部门</p>
+        </div>
+        <div class="department-create-form-container">
+          <div class="department-name-input-container">
+            <span class="department-name-input-label">部门名称</span>
+            <el-input class="department-name-input" v-model="createDepartmentName"/>
+          </div>
+        </div>
+        <div class="department-create-dialog-btn">
+          <el-button type="primary" style="width: 150px; height: 40px;" @click="createDepartment">创建</el-button>
+          <el-button type="info" style="width: 150px; height: 40px;" @click="createDialogVisible = false;">取消</el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Plus } from '@element-plus/icons-vue';
-import { ComputedRef, computed, onMounted, reactive } from 'vue';
+import { ComputedRef, Ref, computed, onMounted, reactive, ref } from 'vue';
 import { Store, useStore } from 'vuex';
 import SpringAPI from '../utils/request';
 import Department from '../types/department';
@@ -54,6 +72,12 @@ const departmentList: Array<Department> = reactive([]);
 const userId: ComputedRef<number> = computed(() => { return store.state.user.userId });
 const token: ComputedRef<string> = computed(() => { return store.state.user.token });
 const username: ComputedRef<string> = computed(() => { return store.state.user.username });
+
+// 新建部门窗口是否显示
+const createDialogVisible: Ref<boolean> = ref(false);
+
+// 新建部门的名称
+const createDepartmentName: Ref<string> = ref('');
 
 onMounted(() => {
   getDepartmentList();
@@ -74,9 +98,35 @@ const getDepartmentList = (): void => {
       }
     })
 }
+
+// 打开新建部门的窗口
+const openCreateDialog = (): void => {
+  createDialogVisible.value = true;
+}
+
+// 新建窗口
+const createDepartment = (): void => {
+  SpringAPI.createDepartment(token.value, userId.value, username.value, createDepartmentName.value)
+  .then((result: Map<string, Object>) => {
+    if (result.get("code") === 0) {
+      createDialogVisible.value = false;
+      const department: Department = new Department();
+      department.id = result.get("departmentId") as number;
+      department.name = createDepartmentName.value;
+      department.createAt = new Date();
+      department.updateAt = new Date();
+      departmentList.push(department);
+      console.log("创建部门成功");
+      createDepartmentName.value = '';
+    } else {
+      console.log("创建部门失败，信息：", result.get("msg") as string);
+    }
+  })
+}
 </script>
 
 <style lang="scss">
+.department-create-layout,
 .department-manage-layout {
   display: flex;
   flex-direction: column;
@@ -84,12 +134,14 @@ const getDepartmentList = (): void => {
   height: calc(100% - 56px);
 }
 
+.department-create-title-container,
 .department-manage-title-container {
   display: flex;
   border-left: 6px #1da8ed solid;
   height: 35px;
 }
 
+.department-create-title,
 .department-manage-title {
   align-self: center;
   margin-left: 15px;
@@ -121,5 +173,41 @@ const getDepartmentList = (): void => {
   display: flex;
   justify-content: flex-start;
   height: 80vh;
+}
+
+.department-create-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  width: 100%;
+}
+
+.department-name-input-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  width: 80%;
+}
+
+.department-name-input-label {
+  font-size: large;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.department-name-input {
+  height: 40px;
+  margin: 20px;
+}
+
+.department-create-dialog-btn {
+  width: 60%;
+  display: flex;
+  justify-content: space-around;
+  align-self: center;
+  justify-self: center;
+  margin: 0 auto 20px auto;
 }
 </style>

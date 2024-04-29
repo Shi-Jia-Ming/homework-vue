@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import Department from "../types/department";
 import Staff from "../types/staff";
+
 axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
 
 export default class SpringAPI {
@@ -49,6 +50,37 @@ export default class SpringAPI {
             .then((response: AxiosResponse<Array<Department>>) => {
                 resultMap.set("code", 0);
                 resultMap.set("departmentList", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 新建部门
+     * 
+     * @param token             用户 jwt 登录凭证
+     * @param id                用户 id
+     * @param username          用户名
+     * @param departmentName    部门名称
+     * @returns 返回新建部门的 id
+     */
+    public static createDepartment = async (token: string, id: number, username: string, departmentName: string): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/department/create', {
+            username: username,
+            departmentName: departmentName
+        }, {
+            headers: {
+                'Token': token,
+                'User-Id': id
+            }
+        })
+            .then((response: AxiosResponse<number>) => {
+                resultMap.set("code", 0);
+                resultMap.set("departmentId", response.data);
             }).catch((error: AxiosError) => {
                 resultMap.set("code", 1);
                 resultMap.set("msg", error.response?.data!);
