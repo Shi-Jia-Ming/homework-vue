@@ -137,15 +137,16 @@ const openEditDialog = (department: Department): void => {
 
 // 新建部门信息
 const createDepartment = (): void => {
-  SpringAPI.createDepartment(token.value, userId.value, username.value, createDepartmentName.value)
+  // 创建部门对象
+  const department: Department = new Department();
+  department.name = createDepartmentName.value;
+  department.createAt = new Date();
+  department.updateAt = new Date();
+  SpringAPI.createDepartment(token.value, userId.value, username.value, department)
     .then((result: Map<string, Object>) => {
       if (result.get("code") === 0) {
         createDialogVisible.value = false;
-        const department: Department = new Department();
         department.id = result.get("departmentId") as number;
-        department.name = createDepartmentName.value;
-        department.createAt = new Date();
-        department.updateAt = new Date();
         departmentList.push(department);
         console.log("创建部门成功");
         createDepartmentName.value = '';

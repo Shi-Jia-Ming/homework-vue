@@ -71,12 +71,10 @@ export default class SpringAPI {
      * @param departmentName    部门名称
      * @returns 返回新建部门的 id
      */
-    public static createDepartment = async (token: string, id: number, username: string, departmentName: string): Promise<Map<string, Object>> => {
+    public static createDepartment = async (token: string, id: number, username: string, department: Department): Promise<Map<string, Object>> => {
         const resultMap: Map<string, Object> = new Map();
 
-        await axios.post(this.url + '/department/create', {
-            departmentName: departmentName
-        }, {
+        await axios.post(this.url + '/department/create', JSON.stringify(department), {
             headers: {
                 'Token': token,
                 'User-Id': id,
@@ -96,9 +94,7 @@ export default class SpringAPI {
     public static editDeparment = async (token: string, id: number, username: string, department: Department): Promise<Map<string, Object>> => {
         const resultMap: Map<string, Object> = new Map();
 
-        await axios.post(this.url + '/department/edit', {
-            department: JSON.stringify(department)
-        }, {
+        await axios.post(this.url + '/department/edit', JSON.stringify(department), {
             headers: {
                 'Token': token,
                 'User-Id': id,
