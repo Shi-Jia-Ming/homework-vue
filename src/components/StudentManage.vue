@@ -145,7 +145,9 @@ import { Plus, Minus } from '@element-plus/icons-vue';
 }
 
 .student-table {
-  height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  height: 80vh;
 }
 
 .page-configuraiton {

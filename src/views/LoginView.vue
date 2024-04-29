@@ -107,6 +107,7 @@ const login = (formEl: FormInstance | undefined): undefined | boolean => {
           // 登录成功，设置用户全局状态          
           userStore.commit('user/setUserId', result.get("id"));
           userStore.commit('user/setToken', result.get("token"));
+          userStore.commit('user/setUsername', loginForm.username);
           
           // 路由跳转
           router.push({ path: "/home" });
