@@ -155,6 +155,7 @@ const createDepartment = (): void => {
       }
     })
 }
+
 // 编辑部门信息
 const editDepartment = (): void => {
   // 新的部门信息
@@ -181,6 +182,7 @@ const editDepartment = (): void => {
 </script>
 
 <style lang="scss">
+.department-edit-layout,
 .department-create-layout,
 .department-manage-layout {
   display: flex;
@@ -189,6 +191,7 @@ const editDepartment = (): void => {
   height: calc(100% - 56px);
 }
 
+.department-edit-title-container,
 .department-create-title-container,
 .department-manage-title-container {
   display: flex;
@@ -196,6 +199,7 @@ const editDepartment = (): void => {
   height: 35px;
 }
 
+.department-edit-title,
 .department-create-title,
 .department-manage-title {
   align-self: center;
@@ -230,6 +234,7 @@ const editDepartment = (): void => {
   height: 80vh;
 }
 
+.department-edit-form-container,
 .department-create-form-container {
   display: flex;
   justify-content: center;
@@ -257,6 +262,7 @@ const editDepartment = (): void => {
   margin: 20px;
 }
 
+.department-edit-dialog-btn,
 .department-create-dialog-btn {
   width: 60%;
   display: flex;
