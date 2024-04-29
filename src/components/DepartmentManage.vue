@@ -17,7 +17,11 @@
       <el-table stripe class="department-table" :data="departmentList">
         <el-table-column prop="id" label="序号" width="180" />
         <el-table-column prop="name" label="部门名称" width="180" />
-        <el-table-column prop="updateAt" label="最后操作时间" width="320" />
+        <el-table-column prop="updateAt" label="最后操作时间" width="320">
+          <template #default="scope">
+            <p>{{ new Date(scope.row.updateAt).toLocaleString() }}</p>
+          </template>
+        </el-table-column>
         <el-table-column fixed="right" label="操作" width="180">
           <template #default>
             <el-button link type="primary" size="small">
@@ -62,7 +66,6 @@ const getDepartmentList = (): void => {
       if (result.get("code") === 0) {
         const departments: Array<Department> = result.get("departmentList") as Array<Department>;
         departments.forEach((department: Department) => {
-          department.updateAt = new Date(department.updateAt).toLocaleString();
           departmentList.push(department);
         })
         console.log("获取部门信息列表成功，列表数据: ", departmentList);

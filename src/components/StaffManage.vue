@@ -46,11 +46,37 @@
       <el-table stripe style="width: 100%" class="staff-table" :data="staffList">
         <el-table-column type="selection" width="55" />
         <el-table-column fixed="left" prop="name" label="姓名" width="170" />
-        <el-table-column prop="image" label="图像" width="170" />
-        <el-table-column prop="gender" label="性别" width="170" />
-        <el-table-column prop="job" label="职位" width="170" />
-        <el-table-column prop="entryDate" label="入职日期" width="170" />
-        <el-table-column prop="updateAt" label="最后操作时间" width="170" />
+        <el-table-column prop="image" label="图像" width="170">
+          <template #default="scope">
+            <el-image :src="scope.row.image"></el-image>
+          </template>
+        </el-table-column>
+        <el-table-column prop="gender" label="性别" width="170">
+          <template #default="scope">
+            <p>{{ scope.row.gender === 1 ? "男" : "女" }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column prop="job" label="职位" width="170">
+          <template #default="scope">
+            <p>{{
+            scope.row.job === 1 ? "班主任" :
+            scope.row.job === 2 ? "讲师" :
+            scope.row.job === 3 ? "学工主管" :
+            scope.row.job === 4 ? "教研主管" :
+            scope.row.job === 5 ? "咨询师" : "" 
+            }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column prop="entryDate" label="入职日期" width="170">
+          <template #default="scope">
+            <p>{{ new Date(scope.row.entryDate).toLocaleDateString() }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column prop="updateAt" label="最后操作时间" width="170">
+          <template #default="scope">
+            <p>{{ new Date(scope.row.updateAt).toLocaleDateString() }}</p>
+          </template>
+        </el-table-column>
         <el-table-column fixed="right" label="操作" width="170">
           <template #default>
             <el-button link type="primary" size="small">
@@ -65,12 +91,12 @@
       <div class="page-configuraiton">
         <div class="page-number-select">
           <p>每页展示的员工数：</p>
-          <el-select multiple placeholder="选择" style="width: 100px">
-            <el-option v-for="item in [10, 20, 50, 100]" :key="item" :label="item" :value="item" />
+          <el-select multiple placeholder="选择" style="width: 100px" v-model="pageNumber">
+            <el-option v-for="item in pageNumberList" :key="item" :label="item" :value="item" />
           </el-select>
         </div>
         <div class="page-select">
-          <p>共{{ 500 }}条数据</p>
+          <p>共{{ staffList.length }}条数据</p>
           <el-pagination background layout="prev, pager, next, jumper" :total="10" class="pagination" />
         </div>
       </div>
@@ -80,7 +106,7 @@
 
 <script setup lang="ts">
 import { Plus, Minus } from '@element-plus/icons-vue';
-import { ComputedRef, computed, onMounted, reactive } from 'vue';
+import { ComputedRef, Ref, computed, onMounted, reactive, ref } from 'vue';
 import { useStore, Store } from 'vuex';
 import Staff from '../types/staff';
 import SpringAPI from '../utils/request';
@@ -90,6 +116,12 @@ const staffList: Array<Staff> = reactive([]);
 
 // 全局状态管理
 const store: Store<any> = useStore();
+
+// 每页展示的信息条数
+const pageNumber: Ref<number> = ref(10);
+
+// 每页可展示的信息数列表
+const pageNumberList: number[] = [10, 20, 50, 100];
 
 // 定义用户信息
 const userId: ComputedRef<number> = computed(() => { return store.state.user.userId });
@@ -103,23 +135,17 @@ onMounted(() => {
 // 获取员工信息列表
 const getStaffList = (): void => {
   SpringAPI.getStaffList(token.value, userId.value, username.value)
-  .then((result: Map<string, Object>) => {
-    if (result.get("code") === 0) {
-      const staff: Array<Staff> = result.get("staff") as Array<Staff>;
+    .then((result: Map<string, Object>) => {
+      if (result.get("code") === 0) {
+        const staff: Array<Staff> = result.get("staff") as Array<Staff>;
         staff.forEach((_staff: Staff) => {
-          _staff.gender = _staff.gender === 1 ? "男" : "女";
-          _staff.job = _staff.job === 1 ? "班主任" :
-          _staff.job === 2 ? "讲师" :
-          _staff.job === 3 ? "学工主管" :
-          _staff.job === 4 ? "教研主管" : 
-          _staff.job === 5 ? "咨询师" : ""
           staffList.push(_staff);
         })
         console.log("获取员工信息列表成功，列表数据: ", staffList);
-    } else {
-      console.log("获取员工信息列表失败");
-    }
-  })
+      } else {
+        console.log("获取员工信息列表失败");
+      }
+    })
 }
 </script>
 
