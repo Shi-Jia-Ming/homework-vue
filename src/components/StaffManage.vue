@@ -43,14 +43,40 @@
       </el-button>
     </div>
     <div class="staff-table-container">
-      <el-table stripe style="width: 100%" class="staff-table">
+      <el-table stripe style="width: 100%" class="staff-table" :data="listInTable">
         <el-table-column type="selection" width="55" />
         <el-table-column fixed="left" prop="name" label="姓名" width="170" />
-        <el-table-column prop="acatar" label="图像" width="170" />
-        <el-table-column prop="gender" label="性别" width="170" />
-        <el-table-column prop="post" label="职位" width="170" />
-        <el-table-column prop="createdAt" label="入职日期" width="170" />
-        <el-table-column prop="updatedAt" label="最后操作时间" width="170" />
+        <el-table-column prop="image" label="图像" width="170">
+          <template #default="scope">
+            <el-image :src="scope.row.image"></el-image>
+          </template>
+        </el-table-column>
+        <el-table-column prop="gender" label="性别" width="170">
+          <template #default="scope">
+            <p>{{ scope.row.gender === 1 ? "男" : "女" }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column prop="job" label="职位" width="170">
+          <template #default="scope">
+            <p>{{
+            scope.row.job === 1 ? "班主任" :
+            scope.row.job === 2 ? "讲师" :
+            scope.row.job === 3 ? "学工主管" :
+            scope.row.job === 4 ? "教研主管" :
+            scope.row.job === 5 ? "咨询师" : "" 
+            }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column prop="entryDate" label="入职日期" width="170">
+          <template #default="scope">
+            <p>{{ new Date(scope.row.entryDate).toLocaleDateString() }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column prop="updateAt" label="最后操作时间" width="170">
+          <template #default="scope">
+            <p>{{ new Date(scope.row.updateAt).toLocaleDateString() }}</p>
+          </template>
+        </el-table-column>
         <el-table-column fixed="right" label="操作" width="170">
           <template #default>
             <el-button link type="primary" size="small">
@@ -65,13 +91,21 @@
       <div class="page-configuraiton">
         <div class="page-number-select">
           <p>每页展示的员工数：</p>
-          <el-select multiple placeholder="选择" style="width: 100px">
-            <el-option v-for="item in [10, 20, 50, 100]" :key="item" :label="item" :value="item" />
+          <el-select placeholder="选择" style="width: 100px" v-model="pageNumber">
+            <el-option v-for="item in pageNumberList" :key="item" :label="item" :value="item" />
           </el-select>
         </div>
         <div class="page-select">
-          <p>共{{ 500 }}条数据</p>
-          <el-pagination background layout="prev, pager, next, jumper" :total="10" class="pagination" />
+          <p>共{{ staffList.length }}条数据</p>
+          <el-pagination 
+            background 
+            layout="prev, pager, next, jumper" 
+            :total="staffList.length" 
+            :page-size="Number(pageNumber)"
+            class="pagination"
+            v-model:current-page="page"
+            :default-current-page="1"
+          />
         </div>
       </div>
     </div>
@@ -80,6 +114,57 @@
 
 <script setup lang="ts">
 import { Plus, Minus } from '@element-plus/icons-vue';
+import { ComputedRef, Ref, computed, onMounted, reactive, ref } from 'vue';
+import { useStore, Store } from 'vuex';
+import Staff from '../types/staff';
+import SpringAPI from '../utils/request';
+
+// 员工信息列表
+const staffList: Array<Staff> = reactive([]);
+
+// 表格上展示的信息列表
+const listInTable: ComputedRef<Array<Staff>> = computed(() => {  
+  const start: number = (page.value - 1) * Number(pageNumber.value);
+  const end: number = Math.min(page.value * Number(pageNumber.value), staffList.length);
+  return staffList.slice(start, end);
+});
+
+// 全局状态管理
+const store: Store<any> = useStore();
+
+// 每页展示的信息条数
+const pageNumber: Ref<string> = ref('10');
+
+// 当前页数
+const page: Ref<number> = ref(1);
+
+// 每页可展示的信息数列表
+const pageNumberList: number[] = [10, 20, 50, 100];
+
+// 定义用户信息
+const userId: ComputedRef<number> = computed(() => { return store.state.user.userId });
+const token: ComputedRef<string> = computed(() => { return store.state.user.token });
+const username: ComputedRef<string> = computed(() => { return store.state.user.username });
+
+onMounted(() => {
+  getStaffList();
+});
+
+// 获取员工信息列表
+const getStaffList = (): void => {
+  SpringAPI.getStaffList(token.value, userId.value, username.value)
+    .then((result: Map<string, Object>) => {
+      if (result.get("code") === 0) {
+        const staff: Array<Staff> = result.get("staff") as Array<Staff>;
+        staff.forEach((_staff: Staff) => {
+          staffList.push(_staff);
+        })
+        console.log("获取员工信息列表成功，列表数据: ", staffList);
+      } else {
+        console.log("获取员工信息列表失败");
+      }
+    })
+}
 </script>
 
 <style lang="scss">
@@ -132,14 +217,16 @@ import { Plus, Minus } from '@element-plus/icons-vue';
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
+  height: calc(100% - 150px);
   width: (170 * 7 + 55)px;
   max-width: 90%;
   margin-top: 20px;
 }
 
 .staff-table {
-  height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  height: 80vh;
 }
 
 .page-configuraiton {
