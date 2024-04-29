@@ -27,7 +27,7 @@
             <el-button link type="primary" size="small" @click="openEditDialog(scope.row)">
               编辑
             </el-button>
-            <el-button link type="primary" size="small">
+            <el-button link type="primary" size="small" @click="openDeleteDialog(scope.row)">
               删除
             </el-button>
           </template>
@@ -35,6 +35,7 @@
       </el-table>
     </div>
 
+    <!-- 新建部门窗口 -->
     <el-dialog v-model="createDialogVisible" width="800" draggable>
       <div class="create-dialog-layout">
         <div class="department-create-title-container">
@@ -54,6 +55,7 @@
       </div>
     </el-dialog>
 
+    <!-- 编辑部门窗口 -->
     <el-dialog v-model="editDialogVisible" width="800" draggable>
       <div class="edit-dialog-layout">
         <div class="department-edit-title-container">
@@ -68,6 +70,24 @@
         <div class="department-edit-dialog-btn">
           <el-button type="primary" style="width: 150px; height: 40px;" @click="editDepartment">确认</el-button>
           <el-button type="info" style="width: 150px; height: 40px;" @click="editDialogVisible = false;">取消</el-button>
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- 删除部门窗口 -->
+    <el-dialog v-model="deleteDialogVisible" width="800" draggable>
+      <div class="delete-dialog-layout">
+        <div class="department-delete-title-container">
+          <p class="department-delete-title">删除部门信息</p>
+        </div>
+        <div class="department-delete-form-container">
+          <div class="department-name-input-container">
+            <span class="department-name-input-label">您确定要删除该部门吗？</span>
+          </div>
+        </div>
+        <div class="department-delete-dialog-btn">
+          <el-button type="primary" style="width: 150px; height: 40px;" @click="deleteDepartment">确认</el-button>
+          <el-button type="info" style="width: 150px; height: 40px;" @click="deleteDialogVisible = false;">取消</el-button>
         </div>
       </div>
     </el-dialog>
@@ -104,6 +124,11 @@ const editDepartmentName: Ref<string> = ref('');
 // 编辑部门的对象
 const editDepartmentObject: Ref<Department | null> = ref(null);
 
+// 删除部门窗口是否显示
+const deleteDialogVisible: Ref<boolean> = ref(false);
+// 删除部门的对象
+const deleteDepartmentObject: Ref<Department | null> = ref(null);
+
 onMounted(() => {
   getDepartmentList();
 });
@@ -133,6 +158,11 @@ const openEditDialog = (department: Department): void => {
   editDepartmentObject.value = department;
   editDepartmentName.value = department.name;
   editDialogVisible.value = true;
+}
+// 打开删除部门的窗口
+const openDeleteDialog = (department: Department): void => {
+  deleteDepartmentObject.value = department;
+  deleteDialogVisible.value = true;
 }
 
 // 新建部门信息
@@ -179,9 +209,24 @@ const editDepartment = (): void => {
       }
     })
 }
+
+// 删除部门信息
+const deleteDepartment = (): void => {
+  SpringAPI.deleteDepartment(token.value, userId.value, username.value, deleteDepartmentObject.value!)
+  .then((result: Map<string, Object>) => {
+    if (result.get("code") === 0) {
+      departmentList.splice(departmentList.indexOf(deleteDepartmentObject.value!), 1);
+      console.log("删除部门信息成功");
+      deleteDialogVisible.value = false;
+    } else {
+      console.log("删除部门信息失败，信息：", result.get("msg") as string);
+    }
+  })
+}
 </script>
 
 <style lang="scss">
+.department-delete-layout,
 .department-edit-layout,
 .department-create-layout,
 .department-manage-layout {
@@ -191,6 +236,7 @@ const editDepartment = (): void => {
   height: calc(100% - 56px);
 }
 
+.department-delete-title-container,
 .department-edit-title-container,
 .department-create-title-container,
 .department-manage-title-container {
@@ -199,6 +245,7 @@ const editDepartment = (): void => {
   height: 35px;
 }
 
+.department-delete-title,
 .department-edit-title,
 .department-create-title,
 .department-manage-title {
@@ -234,6 +281,7 @@ const editDepartment = (): void => {
   height: 80vh;
 }
 
+.department-delete-form-container,
 .department-edit-form-container,
 .department-create-form-container {
   display: flex;
@@ -262,6 +310,7 @@ const editDepartment = (): void => {
   margin: 20px;
 }
 
+.department-delete-dialog-btn,
 .department-edit-dialog-btn,
 .department-create-dialog-btn {
   width: 60%;
