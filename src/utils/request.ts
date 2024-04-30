@@ -98,7 +98,7 @@ export default class SpringAPI {
      * @param department    新的部门信息
      * @returns 更新状态
      */
-    public static editDeparment = async (token: string, id: number, username: string, department: Department): Promise<Map<string, Object>> => {
+    public static editDepartment = async (token: string, id: number, username: string, department: Department): Promise<Map<string, Object>> => {
         const resultMap: Map<string, Object> = new Map();
 
         await axios.post(this.url + '/department/edit', JSON.stringify(department), {
@@ -195,6 +195,35 @@ export default class SpringAPI {
             .then((response: AxiosResponse<Array<Staff>>) => {
                 resultMap.set("code", 0);
                 resultMap.set("staff", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 新建员工信息
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param staff     员工信息
+     * @returns 新建员工的 id
+     */
+    public static createStaff = async (token: string, id: number, username: string, staff: Staff): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/staff/create', JSON.stringify(staff), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((response: AxiosResponse<number>) => {
+                resultMap.set("code", 0);
+                resultMap.set("staffId", response.data);
             }).catch((error: AxiosError) => {
                 resultMap.set("code", 1);
                 resultMap.set("msg", error.response?.data!);
