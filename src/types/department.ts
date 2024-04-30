@@ -1,10 +1,10 @@
 export default class Department {
     // 部门 id
-    id!: number;
+    id: number | undefined;
     // 部门名称
-    name!: string;
+    name: string | undefined;
     // 创建时间
-    createAt!: Date | string;
+    createAt: Date | undefined;
     // 更新时间
-    updateAt!: Date | string;
+    updateAt: Date | undefined;
 }

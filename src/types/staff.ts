@@ -2,25 +2,25 @@ import Department from "./department";
 
 export default class Staff {
     // 员工 id
-    id!: number;
+    id: number | undefined;
     // 用户名
-    username!: string;
+    username: string | undefined;
     // 密码
-    password!: string;
+    password: string | undefined;
     // 姓名
-    name!: string | undefined;
+    name: string | undefined;
     // 性别
-    gender!: number | undefined;
+    gender: number | undefined;
     // 图像
-    image!: string;
+    image: string | undefined;
     // 职务
-    job!: number;
+    job: number | undefined;
     // 入职时间
-    entryDate!: Date | undefined;
+    entryDate: Date | undefined;
     // 所属部门
-    department!: Department;
+    department: Department | undefined;
     // 创建时间
-    createAt!: Date;
+    createAt: Date | undefined;
     // 更新时间
-    updateAt!: Date;
+    updateAt: Date | undefined;
 }

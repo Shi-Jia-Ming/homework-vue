@@ -2,19 +2,19 @@ import Staff from "./staff";
 
 export default class Class {
     // id
-    id!: number;
+    id: number | undefined;
     // 班级名称
-    name!: string;
+    name: string | undefined;
     // 班级教室
-    classroom!: string;
+    classroom: string | undefined;
     // 开课时间
-    startDate!: Date;
+    startDate: Date | undefined;
     // 结课时间
-    endDate!: Date;
+    endDate: Date | undefined;
     // 班主任
-    headTeahcer!: Staff;
+    headTeacher: Staff | undefined;
     // 创建时间
-    createAt!: Date;
+    createAt: Date | undefined;
     // 修改时间
-    updateAt!: Date;
+    updateAt: Date | undefined;
 }
