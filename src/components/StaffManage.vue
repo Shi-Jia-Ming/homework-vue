@@ -5,21 +5,24 @@
     </div>
     <div class="search-group">
       <!-- 查询员工的表单 -->
-      <el-form :inline="true" style="width: 100%; display: flex; justify-content: flex-start;">
-        <el-form-item label="姓名" class="staff-name-container">
-          <el-input style="width: 180px; height: 35px;" />
+      <el-form :inline="true" style="width: 100%; display: flex; justify-content: flex-start;" :model="searchForm" ref="searchFormRef">
+        <el-form-item label="姓名" class="staff-name-container" prop="name">
+          <el-input style="width: 180px; height: 35px;" v-model="searchForm.name" clearable />
         </el-form-item>
 
-        <el-form-item label="性别" class="staff-degree-container">
-          <el-select style="width: 180px; height: 35px;" />
+        <el-form-item label="性别" class="staff-degree-container" prop="gender">
+          <el-select style="width: 180px; height: 35px;" v-model="searchForm.gender" clearable>
+            <el-option label="男" :value="1" />
+            <el-option label="女" :value="2" />
+          </el-select>
         </el-form-item>
 
-        <el-form-item label="入职日期" class="staff-class-container">
-          <el-date-picker type="datetime" style="width: 180px; height: 35px;" />
+        <el-form-item label="入职日期" class="staff-class-container" prop="entryDate">
+          <el-date-picker type="datetime" style="width: 180px; height: 35px;" v-model="searchForm.entryDate"/>
         </el-form-item>
 
         <el-form-item class="search-btn-container">
-          <el-button type="primary" class="search-btn">查询</el-button>
+          <el-button type="info" class="search-btn" @click="reset(searchFormRef)">清空</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -114,10 +117,29 @@
 
 <script setup lang="ts">
 import { Plus, Minus } from '@element-plus/icons-vue';
-import { ComputedRef, Ref, computed, onMounted, reactive, ref } from 'vue';
+import { ComputedRef, Ref, computed, onMounted, reactive, ref, watch } from 'vue';
 import { useStore, Store } from 'vuex';
 import Staff from '../types/staff';
 import SpringAPI from '../utils/request';
+import { FormInstance } from 'element-plus';
+
+// 查询表单
+const searchForm: {
+  name: string | undefined,
+  gender: number | undefined,
+  entryDate: Date | undefined
+} = reactive({
+  name: undefined,
+  gender: undefined,
+  entryDate: undefined
+});
+
+// 侦听表单改变更新列表数据
+watch(searchForm, () => {
+  console.log(searchForm);
+  
+  getStaffLikeList();
+});
 
 // 员工信息列表
 const staffList: Array<Staff> = reactive([]);
@@ -131,6 +153,9 @@ const listInTable: ComputedRef<Array<Staff>> = computed(() => {
 
 // 全局状态管理
 const store: Store<any> = useStore();
+
+// 表单控制器
+const searchFormRef = ref<FormInstance>();
 
 // 每页展示的信息条数
 const pageNumber: Ref<string> = ref('10');
@@ -150,8 +175,17 @@ onMounted(() => {
   getStaffList();
 });
 
+// 重置表单
+const reset = (formEl: FormInstance | undefined): void => {
+  if (!formEl) return;
+  formEl.resetFields();
+}
+
 // 获取员工信息列表
 const getStaffList = (): void => {
+  // 清空原列表
+  staffList.splice(0);
+  // 向后端发送请求
   SpringAPI.getStaffList(token.value, userId.value, username.value)
     .then((result: Map<string, Object>) => {
       if (result.get("code") === 0) {
@@ -164,6 +198,30 @@ const getStaffList = (): void => {
         console.log("获取员工信息列表失败");
       }
     })
+}
+
+// 获取模糊查询的员工信息列表
+const getStaffLikeList = (): void => {
+  // 清空原列表
+  staffList.splice(0);
+  // 定义员工对象
+  const staff: Staff = new Staff();
+  staff.name = searchForm.name;
+  staff.gender = searchForm.gender;
+  staff.entryDate = searchForm.entryDate;
+  // 向后端发送请求
+  SpringAPI.searchStaffLikeList(token.value, userId.value, username.value, staff)
+  .then((result: Map<string, Object>) => {
+    if (result.get("code") == 0) {
+      const _staffList: Array<Staff> = result.get("staff") as Array<Staff>;
+      _staffList.forEach((_staff: Staff) => {
+        staffList.push(_staff);
+      })
+      console.log("模糊查询完毕");
+    } else {
+      console.log("模糊查询失败");
+    }
+  })
 }
 </script>
 

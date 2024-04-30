@@ -174,4 +174,33 @@ export default class SpringAPI {
             })
         return resultMap;
     }
+
+    /**
+     * 根据部分员工信息进行模糊查询
+     * 
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param staffLike 部分员工信息
+     * @returns 符合条件的员工列表
+     */
+    public static searchStaffLikeList = async (token: string, id: number, username: string, staffLike: Staff): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/staff/search', JSON.stringify(staffLike), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((response: AxiosResponse<Array<Staff>>) => {
+                resultMap.set("code", 0);
+                resultMap.set("staff", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
 }

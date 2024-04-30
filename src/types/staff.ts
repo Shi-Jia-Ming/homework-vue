@@ -8,19 +8,19 @@ export default class Staff {
     // 密码
     password!: string;
     // 姓名
-    name!: string;
+    name!: string | undefined;
     // 性别
-    gender!: number | string;
+    gender!: number | undefined;
     // 图像
     image!: string;
     // 职务
-    job!: number | string;
+    job!: number;
     // 入职时间
-    entryDate!: Date | string;
+    entryDate!: Date | undefined;
     // 所属部门
     department!: Department;
     // 创建时间
-    createAt!: Date | string;
+    createAt!: Date;
     // 更新时间
-    updateAt!: Date | string;
+    updateAt!: Date;
 }
