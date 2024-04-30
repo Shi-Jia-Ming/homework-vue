@@ -157,7 +157,7 @@ const openCreateDialog = (): void => {
 // 打开编辑部门的窗口
 const openEditDialog = (department: Department): void => {
   editDepartmentObject.value = department;
-  editDepartmentName.value = department.name;
+  editDepartmentName.value = department.name!;
   editDialogVisible.value = true;
 }
 // 打开删除部门的窗口
@@ -195,7 +195,7 @@ const editDepartment = (): void => {
   newDepartment.name = editDepartmentName.value;
   newDepartment.createAt = editDepartmentObject.value?.createAt!;
   newDepartment.updateAt = new Date();
-  SpringAPI.editDeparment(token.value, userId.value, username.value, newDepartment)
+  SpringAPI.editDepartment(token.value, userId.value, username.value, newDepartment)
     .then((result: Map<string, Object>) => {
       if (result.get("code") === 0) {
         departmentList.forEach((department: Department) => {
