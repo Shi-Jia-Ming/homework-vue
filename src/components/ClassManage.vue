@@ -48,7 +48,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <div class="page-configuraiton">
+      <div class="page-configuration">
         <div class="page-number-select">
           <p>每页展示的班级数：</p>
           <el-select multiple placeholder="选择" style="width: 100px">
@@ -134,7 +134,7 @@ import { Plus } from '@element-plus/icons-vue';
   height: 80vh;
 }
 
-.page-configuraiton {
+.page-configuration {
   display: flex;
   flex-direction: row;
   justify-content: space-between;

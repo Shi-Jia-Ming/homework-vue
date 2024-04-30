@@ -15,11 +15,11 @@
         </el-form-item>
 
         <el-form-item label="最高学历" class="student-degree-container">
-          <el-select style="width: 180px; height: 35px;"/>
+          <el-select style="width: 180px; height: 35px;" />
         </el-form-item>
 
         <el-form-item label="所属班级" class="student-class-container">
-          <el-select style="width: 180px; height: 35px;"/>
+          <el-select style="width: 180px; height: 35px;" />
         </el-form-item>
 
         <el-form-item class="search-btn-container">
@@ -28,7 +28,7 @@
       </el-form>
     </div>
     <div class="btn-container">
-      <el-button type="primary" class="add-btn">
+      <el-button type="primary" class="add-btn" @click="openCreateDialog">
         <template #icon>
           <el-icon :size="15" style="margin-right: 5px;">
             <plus />
@@ -64,12 +64,15 @@
               编辑
             </el-button>
             <el-button link type="primary" size="small">
+              违纪
+            </el-button>
+            <el-button link type="primary" size="small">
               删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
-      <div class="page-configuraiton">
+      <div class="page-configuration">
         <div class="page-number-select">
           <p>每页展示的学员数：</p>
           <el-select multiple placeholder="选择" style="width: 100px">
@@ -82,11 +85,114 @@
         </div>
       </div>
     </div>
+
+    <!-- 添加员工弹窗 -->
+    <el-dialog v-model="createDialogVisible" width="800" draggable>
+      <div class="create-dialog-layout">
+        <div class="staff-create-title-container">
+          <p class="staff-create-title">添加员工信息</p>
+        </div>
+        <div class="staff-create-form-container">
+          <el-form class="staff-create-form" label-position="right" label-width="auto">
+            <el-form-item class="staff-create-form-name" label="姓名">
+              <el-input v-model="newStudent.name"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-stu-number" label="学号">
+              <el-input v-model="newStudent.stuNumber"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-gender" label="性别">
+              <el-select v-model="newStudent.gender">
+                <el-option label="男" :value="1"/>
+                <el-option label="女" :value="2"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item class="staff-create-form-phone" label="手机号">
+              <el-input v-model="newStudent.phone"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-degree" label="最高学历">
+              <el-select v-model="newStudent.degree">
+                <el-option label="本科" :value="1" />
+                <el-option label="大专" :value="2" />
+              </el-select>
+            </el-form-item>
+            <el-form-item class="staff-create-form-class" label="所属班级">
+              <el-select v-model="newStudent.class_"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-btn-group">
+              <div class="btn-group">
+                <el-button type="primary" style="width: 150px; height: 40px;">创建</el-button>
+                <el-button type="info" style="width: 150px; height: 40px;">取消</el-button>
+              </div>
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- 编辑员工信息弹窗 -->
+    <el-dialog v-model="editDialogVisible" width="800" draggable>
+      <div class="edit-dialog-layout">
+        <div class="staff-edit-title-container">
+          <p class="staff-edit-title">编辑员工信息</p>
+        </div>
+        <div class="staff-edit-form-container">
+          <el-form class="staff-edit-form" label-position="right" label-width="auto">
+            <el-form-item class="staff-edit-form-name" label="姓名">
+              <el-input v-model="editStudent.name"/>
+            </el-form-item>
+            <el-form-item class="staff-edit-form-stu-number" label="学号">
+              <el-input v-model="editStudent.stuNumber"/>
+            </el-form-item>
+            <el-form-item class="staff-edit-form-gender" label="性别">
+              <el-select v-model="editStudent.gender">
+                <el-option label="男" :value="1" />
+                <el-option label="女" :value="2" />
+              </el-select>
+            </el-form-item>
+            <el-form-item class="staff-edit-form-phone" label="手机号">
+              <el-input v-model="editStudent.phone"/>
+            </el-form-item>
+            <el-form-item class="staff-edit-form-degree" label="最高学历">
+              <el-select v-model="editStudent.degree">
+                <el-option label="本科" :value="1" />
+                <el-option label="大专" :value="2" />
+              </el-select>
+            </el-form-item>
+            <el-form-item class="staff-edit-form-class" label="所属班级">
+              <el-select  v-model="editStudent.class_"/>
+            </el-form-item>
+            <el-form-item class="staff-edit-form-btn-group">
+              <div class="btn-group">
+                <el-button type="primary" style="width: 150px; height: 40px;">创建</el-button>
+                <el-button type="info" style="width: 150px; height: 40px;">取消</el-button>
+              </div>
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { Plus, Minus } from '@element-plus/icons-vue';
+import { Ref, reactive, ref } from 'vue';
+import Student from '../types/student';
+
+// 新建学生信息窗口是否打开
+const createDialogVisible: Ref<boolean> = ref(false);
+// 新建学生的基本信息
+const newStudent: Student = reactive<Student>(new Student());
+
+// 编辑学生信息窗口是否打开
+const editDialogVisible: Ref<boolean> = ref(false);
+// 编辑学生的基本信息
+const editStudent: Student = reactive<Student>(new Student());
+
+// 打开新建学生信息窗口
+const openCreateDialog = (): void => {
+  createDialogVisible.value = true;
+}
 </script>
 
 <style lang="scss">
@@ -150,7 +256,7 @@ import { Plus, Minus } from '@element-plus/icons-vue';
   height: 80vh;
 }
 
-.page-configuraiton {
+.page-configuration {
   display: flex;
   flex-direction: row;
   justify-content: space-between;

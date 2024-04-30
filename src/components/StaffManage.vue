@@ -87,15 +87,12 @@
               编辑
             </el-button>
             <el-button link type="primary" size="small">
-              违纪
-            </el-button>
-            <el-button link type="primary" size="small">
               删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
-      <div class="page-configuraiton">
+      <div class="page-configuration">
         <div class="page-number-select">
           <p>每页展示的员工数：</p>
           <el-select placeholder="选择" style="width: 100px" v-model="pageNumber">
@@ -442,7 +439,7 @@ const getStaffLikeList = (): void => {
   height: 80vh;
 }
 
-.page-configuraiton {
+.page-configuration {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
