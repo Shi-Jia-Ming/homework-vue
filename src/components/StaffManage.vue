@@ -27,7 +27,7 @@
       </el-form>
     </div>
     <div class="btn-container">
-      <el-button type="primary" class="add-btn">
+      <el-button type="primary" class="add-btn" @click="openCreateDialog">
         <template #icon>
           <el-icon :size="15" style="margin-right: 5px;">
             <plus />
@@ -86,6 +86,9 @@
               编辑
             </el-button>
             <el-button link type="primary" size="small">
+              违纪
+            </el-button>
+            <el-button link type="primary" size="small">
               删除
             </el-button>
           </template>
@@ -112,6 +115,43 @@
         </div>
       </div>
     </div>
+
+    <!-- 添加员工弹窗 -->
+    <el-dialog v-model="createDialogVisible" width="800" draggable>
+      <div class="create-dialog-layout">
+        <div class="staff-create-title-container">
+          <p class="staff-create-title">添加员工信息</p>
+        </div>
+        <div class="staff-create-form-container">
+          <el-form class="staff-create-form" label-position="right" label-width="auto">
+            <el-form-item class="staff-create-form-name" label="姓名">
+              <el-input />
+            </el-form-item>
+            <el-form-item class="staff-create-form-stu-number" label="学号">
+              <el-input />
+            </el-form-item>
+            <el-form-item class="staff-create-form-gender" label="性别">
+              <el-select />
+            </el-form-item>
+            <el-form-item class="staff-create-form-phone" label="手机号">
+              <el-input />
+            </el-form-item>
+            <el-form-item class="staff-create-form-degree" label="最高学历">
+              <el-select />
+            </el-form-item>
+            <el-form-item class="staff-create-form-class" label="所属班级">
+              <el-select />
+            </el-form-item>
+            <el-form-item class="staff-create-form-btn-group">
+              <div class="btn-group">
+                <el-button type="primary" style="width: 150px; height: 40px;">创建</el-button>
+                <el-button type="info" style="width: 150px; height: 40px;">取消</el-button>
+              </div>
+            </el-form-item>
+          </el-form>  
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -140,6 +180,11 @@ watch(searchForm, () => {
   
   getStaffLikeList();
 });
+
+// 打开新建员工信息的窗口
+const openCreateDialog = (): void => {
+  createDialogVisible.value = true;
+}
 
 // 员工信息列表
 const staffList: Array<Staff> = reactive([]);
@@ -170,6 +215,11 @@ const pageNumberList: number[] = [10, 20, 50, 100];
 const userId: ComputedRef<number> = computed(() => { return store.state.user.userId });
 const token: ComputedRef<string> = computed(() => { return store.state.user.token });
 const username: ComputedRef<string> = computed(() => { return store.state.user.username });
+
+// 新建员工信息窗口是否打开
+const createDialogVisible: Ref<boolean> = ref(false);
+// 新建员工的基本信息
+const newStaff: Staff = reactive<Staff>(new Staff());
 
 onMounted(() => {
   getStaffList();
@@ -226,6 +276,7 @@ const getStaffLikeList = (): void => {
 </script>
 
 <style lang="scss">
+.staff-create-layout,
 .staff-manage-layout {
   display: flex;
   flex-direction: column;
@@ -233,12 +284,14 @@ const getStaffLikeList = (): void => {
   height: calc(100% - 56px);
 }
 
+.staff-create-title-container,
 .staff-manage-title-container {
   display: flex;
   border-left: 6px #1da8ed solid;
   height: 35px;
 }
 
+.staff-create-title,
 .staff-manage-title {
   align-self: center;
   margin-left: 15px;
@@ -303,5 +356,35 @@ const getStaffLikeList = (): void => {
 
 .pagination {
   margin-left: 20px;
+}
+
+.staff-create-form-container {
+  align-self: center;
+  padding: 30px 20px;
+}
+
+.staff-create-form-name,
+.staff-create-form-gender,
+.staff-create-form-stu-number,
+.staff-create-form-phone,
+.staff-create-form-degree,
+staff-create-form-class {
+  margin: 30px 0;
+}
+
+.staff-create-form-btn-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  margin: 40px 0 0 0;
+  width: 100%;
+}
+
+.btn-group {
+  display: flex;
+  justify-content: space-around;
+  width: 75%;
+  margin: auto;
 }
 </style>

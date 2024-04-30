@@ -122,6 +122,7 @@ const editDialogVisible: Ref<boolean> = ref(false);
 // 编辑部门的名称
 const editDepartmentName: Ref<string> = ref('');
 // 编辑部门的对象
+// TODO 可能需要转换成 reactive
 const editDepartmentObject: Ref<Department | null> = ref(null);
 
 // 删除部门窗口是否显示
