@@ -5,7 +5,8 @@
     </div>
     <div class="search-group">
       <!-- 查询员工的表单 -->
-      <el-form :inline="true" style="width: 100%; display: flex; justify-content: flex-start;" :model="searchForm" ref="searchFormRef">
+      <el-form :inline="true" style="width: 100%; display: flex; justify-content: flex-start;" :model="searchForm"
+        ref="searchFormRef">
         <el-form-item label="姓名" class="staff-name-container" prop="name">
           <el-input style="width: 180px; height: 35px;" v-model="searchForm.name" clearable />
         </el-form-item>
@@ -18,7 +19,7 @@
         </el-form-item>
 
         <el-form-item label="入职日期" class="staff-class-container" prop="entryDate">
-          <el-date-picker type="datetime" style="width: 180px; height: 35px;" v-model="searchForm.entryDate"/>
+          <el-date-picker type="datetime" style="width: 180px; height: 35px;" v-model="searchForm.entryDate" />
         </el-form-item>
 
         <el-form-item class="search-btn-container">
@@ -62,11 +63,11 @@
         <el-table-column prop="job" label="职位" width="170">
           <template #default="scope">
             <p>{{
-            scope.row.job === 1 ? "班主任" :
-            scope.row.job === 2 ? "讲师" :
-            scope.row.job === 3 ? "学工主管" :
-            scope.row.job === 4 ? "教研主管" :
-            scope.row.job === 5 ? "咨询师" : "" 
+              scope.row.job === 1 ? "班主任" :
+                scope.row.job === 2 ? "讲师" :
+                  scope.row.job === 3 ? "学工主管" :
+                    scope.row.job === 4 ? "教研主管" :
+                      scope.row.job === 5 ? "咨询师" : ""
             }}</p>
           </template>
         </el-table-column>
@@ -81,8 +82,8 @@
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="170">
-          <template #default>
-            <el-button link type="primary" size="small">
+          <template #default="scope">
+            <el-button link type="primary" size="small" @click="openEditDialog(scope.row)">
               编辑
             </el-button>
             <el-button link type="primary" size="small">
@@ -103,44 +104,55 @@
         </div>
         <div class="page-select">
           <p>共{{ staffList.length }}条数据</p>
-          <el-pagination 
-            background 
-            layout="prev, pager, next, jumper" 
-            :total="staffList.length" 
-            :page-size="Number(pageNumber)"
-            class="pagination"
-            v-model:current-page="page"
-            :default-current-page="1"
-          />
+          <el-pagination background layout="prev, pager, next, jumper" :total="staffList.length"
+            :page-size="Number(pageNumber)" class="pagination" v-model:current-page="page" :default-current-page="1" />
         </div>
       </div>
     </div>
 
     <!-- 添加员工弹窗 -->
     <el-dialog v-model="createDialogVisible" width="800" draggable>
-      <div class="create-dialog-layout">
+      <div class="staff-create-dialog-layout">
         <div class="staff-create-title-container">
           <p class="staff-create-title">添加员工信息</p>
         </div>
         <div class="staff-create-form-container">
           <el-form class="staff-create-form" label-position="right" label-width="auto">
-            <el-form-item class="staff-create-form-name" label="姓名">
-              <el-input />
+            <el-form-item class="staff-create-form-username" label="用户名">
+              <el-input v-model="newStaff.username"/>
             </el-form-item>
-            <el-form-item class="staff-create-form-stu-number" label="学号">
-              <el-input />
+            <el-form-item class="staff-create-form-name" label="员工姓名">
+              <el-input v-model="newStaff.name"/>
             </el-form-item>
             <el-form-item class="staff-create-form-gender" label="性别">
-              <el-select />
+              <el-select v-model="newStaff.gender">
+              <el-option label="男" :value="1" />
+              <el-option label="女" :value="2" />
+            </el-select>
             </el-form-item>
-            <el-form-item class="staff-create-form-phone" label="手机号">
-              <el-input />
+            <el-form-item class="staff-create-form-image" label="图像">
+              <el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+                :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+                <img v-if="newStaff.image" :src="`/api/${newStaff.image}`" class="avatar" />
+                <el-icon v-else class="avatar-uploader-icon">
+                  <plus />
+                </el-icon>
+              </el-upload>
             </el-form-item>
-            <el-form-item class="staff-create-form-degree" label="最高学历">
-              <el-select />
+            <el-form-item class="staff-create-form-job" label="职位">
+              <el-select v-model="newStaff.job">
+              <el-option label="班主任" :value="1" />
+              <el-option label="讲师" :value="2" />
+              <el-option label="学工主管" :value="3" />
+              <el-option label="教研主管" :value="4" />
+              <el-option label="咨询师" :value="5" />
+            </el-select>
             </el-form-item>
-            <el-form-item class="staff-create-form-class" label="所属班级">
-              <el-select />
+            <el-form-item class="staff-create-form-entry-date" label="入职日期">
+              <el-date-picker v-model="newStaff.entryDate"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-department" label="归属部门">
+              <el-select v-model="newStaff.department"/>
             </el-form-item>
             <el-form-item class="staff-create-form-btn-group">
               <div class="btn-group">
@@ -148,10 +160,65 @@
                 <el-button type="info" style="width: 150px; height: 40px;">取消</el-button>
               </div>
             </el-form-item>
-          </el-form>  
+          </el-form>
         </div>
       </div>
     </el-dialog>
+
+    <!-- 编辑员工信息弹窗 -->
+    <el-dialog v-model="editDialogVisible" width="800" draggable>
+    <div class="edit-dialog-layout">
+      <div class="staff-edit-title-container">
+        <p class="staff-edit-title">编辑员工信息</p>
+      </div>
+      <div class="staff-edit-form-container">
+        <el-form class="staff-edit-form" label-position="right" label-width="auto">
+          <el-form-item class="staff-edit-form-username" label="用户名">
+            <el-input v-model="editStaff.username" />
+          </el-form-item>
+          <el-form-item class="staff-edit-form-name" label="员工姓名">
+            <el-input v-model="editStaff.name" />
+          </el-form-item>
+          <el-form-item class="staff-edit-form-gender" label="性别">
+            <el-select v-model="editStaff.gender">
+              <el-option label="男" :value="1" />
+              <el-option label="女" :value="2" />
+            </el-select>
+          </el-form-item>
+          <el-form-item class="staff-edit-form-image" label="图像">
+            <el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+              :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+              <img v-if="editStaff.image" :src="`/api/${editStaff.image}`" class="avatar" />
+              <el-icon v-else class="avatar-uploader-icon">
+                <plus />
+              </el-icon>
+            </el-upload>
+          </el-form-item>
+          <el-form-item class="staff-edit-form-job" label="职位">
+            <el-select v-model="editStaff.job">
+              <el-option label="班主任" :value="1" />
+              <el-option label="讲师" :value="2" />
+              <el-option label="学工主管" :value="3" />
+              <el-option label="教研主管" :value="4" />
+              <el-option label="咨询师" :value="5" />
+            </el-select>
+          </el-form-item>
+          <el-form-item class="staff-edit-form-entry-date" label="入职日期">
+            <el-date-picker v-model="editStaff.entryDate" />
+          </el-form-item>
+          <el-form-item class="staff-edit-form-department" label="归属部门">
+            <el-select v-model="editStaff.department" />
+          </el-form-item>
+          <el-form-item class="staff-edit-form-btn-group">
+            <div class="btn-group">
+              <el-button type="primary" style="width: 150px; height: 40px;">确认</el-button>
+              <el-button type="info" style="width: 150px; height: 40px;">取消</el-button>
+            </div>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
+  </el-dialog>
   </div>
 </template>
 
@@ -177,20 +244,15 @@ const searchForm: {
 // 侦听表单改变更新列表数据
 watch(searchForm, () => {
   console.log(searchForm);
-  
+
   getStaffLikeList();
 });
-
-// 打开新建员工信息的窗口
-const openCreateDialog = (): void => {
-  createDialogVisible.value = true;
-}
 
 // 员工信息列表
 const staffList: Array<Staff> = reactive([]);
 
 // 表格上展示的信息列表
-const listInTable: ComputedRef<Array<Staff>> = computed(() => {  
+const listInTable: ComputedRef<Array<Staff>> = computed(() => {
   const start: number = (page.value - 1) * Number(pageNumber.value);
   const end: number = Math.min(page.value * Number(pageNumber.value), staffList.length);
   return staffList.slice(start, end);
@@ -221,14 +283,53 @@ const createDialogVisible: Ref<boolean> = ref(false);
 // 新建员工的基本信息
 const newStaff: Staff = reactive<Staff>(new Staff());
 
+// 编辑员工信息窗口是否打开
+const editDialogVisible: Ref<boolean> = ref(false);
+// 编辑员工的基本信息
+const editStaff: Staff = reactive<Staff>(new Staff());
+
+// 表单中的图片资源地址
+const imageUrl: Ref<string> = ref('');
+
 onMounted(() => {
   getStaffList();
 });
+
+
+// 打开新建员工信息的窗口
+const openCreateDialog = (): void => {
+  createDialogVisible.value = true;
+}
+// 打开编辑员工信息的窗口
+const openEditDialog = (staff: Staff): void => {
+  editStaff.id = staff.id;
+  editStaff.image = staff.image;
+  editStaff.name = staff.name;
+  editStaff.password = staff.password;
+  editStaff.username = staff.username;
+  editStaff.job = staff.job;
+  editStaff.department = staff.department;
+  editStaff.entryDate = staff.entryDate;
+  editStaff.gender = staff.gender;
+  editStaff.createAt = staff.createAt;
+  editStaff.updateAt = staff.updateAt;
+  editDialogVisible.value = true;
+}
 
 // 重置表单
 const reset = (formEl: FormInstance | undefined): void => {
   if (!formEl) return;
   formEl.resetFields();
+}
+
+// 用户上传图像之前回调
+const beforeAvatarUpload = (): void => {
+
+}
+
+// 用户图像上传成功回调
+const handleAvatarSuccess = (): void => {
+
 }
 
 // 获取员工信息列表
@@ -261,22 +362,21 @@ const getStaffLikeList = (): void => {
   staff.entryDate = searchForm.entryDate;
   // 向后端发送请求
   SpringAPI.searchStaffLikeList(token.value, userId.value, username.value, staff)
-  .then((result: Map<string, Object>) => {
-    if (result.get("code") == 0) {
-      const _staffList: Array<Staff> = result.get("staff") as Array<Staff>;
-      _staffList.forEach((_staff: Staff) => {
-        staffList.push(_staff);
-      })
-      console.log("模糊查询完毕");
-    } else {
-      console.log("模糊查询失败");
-    }
-  })
+    .then((result: Map<string, Object>) => {
+      if (result.get("code") == 0) {
+        const _staffList: Array<Staff> = result.get("staff") as Array<Staff>;
+        _staffList.forEach((_staff: Staff) => {
+          staffList.push(_staff);
+        })
+        console.log("模糊查询完毕");
+      } else {
+        console.log("模糊查询失败");
+      }
+    })
 }
 </script>
 
 <style lang="scss">
-.staff-create-layout,
 .staff-manage-layout {
   display: flex;
   flex-direction: column;
@@ -284,6 +384,7 @@ const getStaffLikeList = (): void => {
   height: calc(100% - 56px);
 }
 
+.staff-edit-title-container,
 .staff-create-title-container,
 .staff-manage-title-container {
   display: flex;
@@ -291,6 +392,7 @@ const getStaffLikeList = (): void => {
   height: 35px;
 }
 
+.staff-edit-title,
 .staff-create-title,
 .staff-manage-title {
   align-self: center;
@@ -358,20 +460,40 @@ const getStaffLikeList = (): void => {
   margin-left: 20px;
 }
 
+.el-overlay,
+.el-overlay-dialog {
+  height: 100%;
+}
+
+.staff-create-dialog-layout {
+  margin: auto;
+}
+
+.staff-edit-form-container,
 .staff-create-form-container {
   align-self: center;
   padding: 30px 20px;
 }
 
+.staff-edit-form-username,
+.staff-edit-form-name,
+.staff-edit-form-gender,
+.staff-edit-form-image,
+.staff-edit-form-job,
+.staff-edit-form-entry-date,
+.staff-edit-form-entry-department,
+.staff-create-form-username,
 .staff-create-form-name,
 .staff-create-form-gender,
-.staff-create-form-stu-number,
-.staff-create-form-phone,
-.staff-create-form-degree,
+.staff-create-form-image,
+.staff-create-form-job,
+.staff-create-form-entry-date,
+.staff-create-form-entry-department,
 staff-create-form-class {
-  margin: 30px 0;
+  margin: 20px 0;
 }
 
+.staff-edit-form-btn-group,
 .staff-create-form-btn-group {
   display: flex;
   justify-content: center;
@@ -386,5 +508,27 @@ staff-create-form-class {
   justify-content: space-around;
   width: 75%;
   margin: auto;
+}
+
+// 上传组件样式
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
 }
 </style>
