@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios, {AxiosError, AxiosResponse} from "axios";
 import Department from "../types/department";
 import Staff from "../types/staff";
 
@@ -10,9 +10,7 @@ export default class SpringAPI {
 
     /**
      * 用户登录
-     * 
-     * @param username 用户名
-     * @param password 密码
+     * @param loginForm 用户登录信息
      * @returns 返回用户登录凭证
      */
     public static login = async (loginForm: { username: string, password: string }): Promise<Map<string, Object>> => {
@@ -36,7 +34,7 @@ export default class SpringAPI {
 
     /**
      * 获取所有部门信息
-     * 
+     *
      * @param token     用户 jwt 登录凭证
      * @param id        用户 id
      * @param username  用户名
@@ -64,11 +62,11 @@ export default class SpringAPI {
 
     /**
      * 新建部门
-     * 
+     *
      * @param token             用户 jwt 登录凭证
      * @param id                用户 id
      * @param username          用户名
-     * @param departmentName    部门名称
+     * @param department        新的部门信息
      * @returns 返回新建部门的 id
      */
     public static createDepartment = async (token: string, id: number, username: string, department: Department): Promise<Map<string, Object>> => {
@@ -93,7 +91,7 @@ export default class SpringAPI {
 
     /**
      * 更新部门信息
-     * 
+     *
      * @param token         用户 jwt 登录凭证
      * @param id            用户 id
      * @param username      用户名
@@ -121,7 +119,7 @@ export default class SpringAPI {
 
     /**
      * 删除部门信息
-     * 
+     *
      * @param token         用户 jwt 登录凭证
      * @param id            用户 id
      * @param username      用户名
@@ -149,7 +147,7 @@ export default class SpringAPI {
 
     /**
      * 获取所有员工信息
-     * 
+     *
      * @param token     用户 jwt 登录凭证
      * @param id        用户 id
      * @param username  用户名
@@ -177,7 +175,7 @@ export default class SpringAPI {
 
     /**
      * 根据部分员工信息进行模糊查询
-     * 
+     *
      * @param token     用户 jwt 登录凭证
      * @param id        用户 id
      * @param username  用户名
