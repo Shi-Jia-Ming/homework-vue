@@ -1,6 +1,7 @@
 import axios, {AxiosError, AxiosResponse} from "axios";
 import Department from "../types/department";
 import Staff from "../types/staff";
+import Student from "../types/student.ts";
 
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
@@ -280,6 +281,33 @@ export default class SpringAPI {
         })
             .then((_response: AxiosResponse<string>) => {
                 resultMap.set("code", 0);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 获取班级列表
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     */
+    public static getClassList = async (token: string, id: number, username: string): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.get(this.url + 'class/getAll', {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((response: AxiosResponse<Array<Student>>) => {
+                resultMap.set("code", 0);
+                resultMap.set("classes", response.data);
             }).catch((error: AxiosError) => {
                 resultMap.set("code", 1);
                 resultMap.set("msg", error.response?.data!);

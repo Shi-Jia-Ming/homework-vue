@@ -7,12 +7,12 @@
       <!-- 查询班级的表单 -->
       <el-form :inline="true" style="width: 100%; display: flex; justify-content: flex-start;">
         <el-form-item label="班级名称" class="class-name-container">
-          <el-input style="width: 200px; height: 35px;" />
+          <el-input style="width: 200px; height: 35px;"/>
         </el-form-item>
 
         <el-form-item label="结课时间" class="class-time-container">
           <el-date-picker type="daterange" range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"
-            style="width: 200px; height: 35px;" />
+                          style="width: 200px; height: 35px;"/>
         </el-form-item>
 
         <el-form-item class="search-btn-container">
@@ -24,19 +24,31 @@
       <el-button type="primary" class="add-btn">
         <template #icon>
           <el-icon :size="15" style="margin-right: 5px;">
-            <plus />
+            <plus/>
           </el-icon>
           <p>新增班级</p>
         </template>
       </el-button>
     </div>
     <div class="class-table-container">
-      <el-table stripe style="width: 100%" class="class-table">
-        <el-table-column prop="index" label="序号" width="170" />
-        <el-table-column prop="name" label="班级名称" width="170" />
-        <el-table-column prop="startTime" label="开课时间" width="170" />
-        <el-table-column prop="endTime" label="结课时间" width="170" />
-        <el-table-column prop="teacher" label="班主任" width="170" />
+      <el-table stripe style="width: 100%" class="class-table" :data="listInTable">
+        <el-table-column prop="id" label="序号" width="170"/>
+        <el-table-column prop="name" label="班级名称" width="170"/>
+        <el-table-column prop="startDate" label="开课时间" width="170">
+          <template #default="scope">
+            <p>{{ new Date(scope.row.startDate).toLocaleDateString() }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column prop="endDate" label="结课时间" width="170">
+          <template #default="scope">
+            <p>{{ new Date(scope.row.endDate).toLocaleDateString() }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column prop="teacher" label="班主任" width="170">
+          <template #default="scope">
+            <p>{{ scope.row.headTeacher.name }}</p>
+          </template>
+        </el-table-column>
         <el-table-column fixed="right" label="操作" width="170">
           <template #default>
             <el-button link type="primary" size="small">
@@ -51,13 +63,15 @@
       <div class="page-configuration">
         <div class="page-number-select">
           <p>每页展示的班级数：</p>
-          <el-select multiple placeholder="选择" style="width: 100px">
-            <el-option v-for="item in [10, 20, 50, 100]" :key="item" :label="item" :value="item" />
+          <el-select placeholder="选择" style="width: 100px" v-model="pageNumber">
+            <el-option v-for="item in pageNumberList" :key="item" :label="item" :value="item"/>
           </el-select>
         </div>
         <div class="page-select">
-          <p>共{{ 500 }}条数据</p>
-          <el-pagination background layout="prev, pager, next, jumper" :total="10" class="pagination" />
+          <p>共{{ classList.length }}条数据</p>
+          <el-pagination background layout="prev, pager, next, jumper" :total="classList.length"
+                         :page-size="Number(pageNumber)" class="pagination" v-model:current-page="page"
+                         :default-current-page="1"/>
         </div>
       </div>
     </div>
@@ -65,7 +79,68 @@
 </template>
 
 <script setup lang="ts">
-import { Plus } from '@element-plus/icons-vue';
+import {Plus} from '@element-plus/icons-vue';
+import Class from "../types/class.ts";
+import {Store, useStore} from 'vuex';
+import {ComputedRef, onMounted, reactive, Ref, ref, computed} from "vue";
+import SpringAPI from "../utils/request.ts";
+
+// 用户全局状态
+const store: Store<any> = useStore();
+
+// 条件查询的表单
+const searchForm: Class = reactive<Class>(new Class());
+
+// 班级列表
+const classList: Array<Class> = reactive<Class>([]);
+
+// 每页展示的信息条数
+const pageNumber: Ref<string> = ref<string>('10');
+
+// 当前页数
+const page: Ref<number> = ref(1);
+
+// 每页可展示的信息数列表
+const pageNumberList: number[] = [10, 20, 50, 100];
+
+// 表格上展示的信息列表
+const listInTable: ComputedRef<Array<Class>> = computed(() => {
+  const start: number = (page.value - 1) * Number(pageNumber.value);
+  const end: number = Math.min(page.value * Number(pageNumber.value), classList.length);
+  return classList.slice(start, end);
+});
+
+// 定义用户信息
+const userId: ComputedRef<number> = computed(() => {
+  return store.state.user.userId
+});
+const token: ComputedRef<string> = computed(() => {
+  return store.state.user.token
+});
+const username: ComputedRef<string> = computed(() => {
+  return store.state.user.username
+});
+
+onMounted(() => {
+  getClassList();
+})
+
+// 获取班级列表
+const getClassList = (): void => {
+  SpringAPI.getClassList(token.value, userId.value, username.value)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 获取班级列表成功
+          const _classList = result.get("classes") as Array<Class>;
+          _classList.forEach((class_: Class) => {
+            classList.push(class_);
+          })
+          console.log("获取班级列表成功, 班级列表: ", classList);
+        } else {
+          console.log("获取班级列表失败, 信息: ", result.get("msg") as string);
+        }
+      })
+}
 </script>
 
 <style lang="scss">
@@ -122,7 +197,7 @@ import { Plus } from '@element-plus/icons-vue';
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
+  height: calc(100% - 150px);
   width: 170 * 6px;
   max-width: 90%;
   margin-top: 20px;
