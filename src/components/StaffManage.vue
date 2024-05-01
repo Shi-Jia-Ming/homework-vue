@@ -52,7 +52,7 @@
         <el-table-column fixed="left" prop="name" label="姓名" width="170"/>
         <el-table-column prop="image" label="图像" width="170">
           <template #default="scope">
-            <el-image :src="scope.row.image"></el-image>
+            <el-image :src="`/api/${scope.row.image}`" style="width: 75px; height: 75px;"></el-image>
           </template>
         </el-table-column>
         <el-table-column prop="gender" label="性别" width="170">
