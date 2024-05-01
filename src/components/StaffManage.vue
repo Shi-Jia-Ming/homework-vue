@@ -37,7 +37,7 @@
         </template>
       </el-button>
 
-      <el-button type="primary" class="add-btn">
+      <el-button type="primary" class="add-btn" @click="openDeleteDialog">
         <template #icon>
           <el-icon :size="15" style="margin-right: 5px;">
             <minus/>
@@ -47,7 +47,7 @@
       </el-button>
     </div>
     <div class="staff-table-container">
-      <el-table stripe style="width: 100%" class="staff-table" :data="listInTable">
+      <el-table stripe style="width: 100%" class="staff-table" :data="listInTable" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55"/>
         <el-table-column fixed="left" prop="name" label="姓名" width="170"/>
         <el-table-column prop="image" label="图像" width="170">
@@ -277,7 +277,7 @@ const staffListToDelete: Array<Staff> = reactive([]);
 // 待删除的员工信息
 const staffToDelete: Staff = reactive(new Staff());
 // 选中的员工信息列表
-const selectedStaffList: Array<Staff> = reactive([]);
+const selectedStaffList: Ref<Staff[]> = ref<Staff[]>([]);
 
 // 部门信息列表
 const departmentList: Array<Department> = reactive([]);
@@ -409,6 +409,11 @@ const handleAvatarSuccessEdit = (response: string, _uploadFile): UploadProps['on
   console.log("上传头像成功");
 }
 
+// 表格选择更新回调
+const handleSelectionChange = (selected: Staff[]): void => {
+  selectedStaffList.value = selected;
+}
+
 // 获取员工信息列表
 const getStaffList = (): void => {
   // 清空原列表
@@ -512,7 +517,7 @@ const deleteStaff = async (): void => {
   // 清空列表消息
   staffListToDelete.splice(0);
   staffListToDelete.push(staffToDelete);
-  selectedStaffList.forEach((staff_: Staff) => {
+  selectedStaffList.value.forEach((staff_: Staff) => {
     staffListToDelete.push(staff_);
   });
   console.log(staffListToDelete);
