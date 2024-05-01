@@ -86,7 +86,7 @@
             <el-button link type="primary" size="small" @click="openEditDialog(scope.row)">
               编辑
             </el-button>
-            <el-button link type="primary" size="small">
+            <el-button link type="primary" size="small" @click="openDeleteDialog(scope.row)">
               删除
             </el-button>
           </template>
@@ -223,6 +223,24 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- 删除员工信息窗口 -->
+    <el-dialog v-model="deleteDialogVisible" width="800" draggable>
+      <div class="delete-dialog-layout">
+        <div class="staff-delete-title-container">
+          <p class="staff-delete-title">删除部门信息</p>
+        </div>
+        <div class="staff-delete-form-container">
+          <div class="staff-name-input-container">
+            <span class="staff-name-input-label">您确定要删除该员工信息吗？</span>
+          </div>
+        </div>
+        <div class="staff-delete-dialog-btn">
+          <el-button type="primary" style="width: 150px; height: 40px;" @click="deleteStaff">确认</el-button>
+          <el-button type="info" style="width: 150px; height: 40px;" @click="deleteDialogVisible = false">取消</el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -234,6 +252,7 @@ import Staff from '../types/staff';
 import SpringAPI from '../utils/request';
 import {FormInstance, UploadProps} from 'element-plus';
 import Department from "../types/department.ts";
+import {FALSE} from "sass";
 
 // 查询表单
 const searchForm: {
@@ -248,13 +267,17 @@ const searchForm: {
 
 // 侦听表单改变更新列表数据
 watch(searchForm, () => {
-  console.log(searchForm);
-
   getStaffLikeList();
 });
 
 // 员工信息列表
 const staffList: Array<Staff> = reactive([]);
+// 待删除的员工信息列表
+const staffListToDelete: Array<Staff> = reactive([]);
+// 待删除的员工信息
+const staffToDelete: Staff = reactive(new Staff());
+// 选中的员工信息列表
+const selectedStaffList: Array<Staff> = reactive([]);
 
 // 部门信息列表
 const departmentList: Array<Department> = reactive([]);
@@ -304,6 +327,9 @@ const editDialogVisible: Ref<boolean> = ref(false);
 // 编辑员工的基本信息
 const editStaffObj: Staff = reactive<Staff>(new Staff());
 
+// 删除员工信息窗口是否打开
+const deleteDialogVisible: Ref<boolean> = ref(false);
+
 onMounted(() => {
   getStaffList();
 });
@@ -328,6 +354,12 @@ const openEditDialog = (staff: Staff): void => {
   departmentId.value = editStaffObj.department?.id;
   editDialogVisible.value = true;
 }
+// 打开删除员工信息的窗口
+const openDeleteDialog = (staff: Staff): void => {
+  staffToDelete.setValue(staff);
+  deleteDialogVisible.value = true;
+}
+
 
 // 重置表单
 const reset = (formEl: FormInstance | undefined): void => {
@@ -475,6 +507,35 @@ const editStaff = async (): void => {
       })
 }
 
+// 删除员工信息
+const deleteStaff = async (): void => {
+  // 清空列表消息
+  staffListToDelete.splice(0);
+  staffListToDelete.push(staffToDelete);
+  selectedStaffList.forEach((staff_: Staff) => {
+    staffListToDelete.push(staff_);
+  });
+  console.log(staffListToDelete);
+  SpringAPI.deleteStaff(token.value, userId.value, username.value, staffListToDelete)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          console.log("删除员工信息成功");
+          // 删除界面中的数据
+          staffListToDelete.forEach((staffToDel) => {
+            staffList.forEach((staffInTable: Staff) => {
+              if (staffInTable.id === staffToDel.id) {
+                console.log(staffList.indexOf(staffInTable));
+                staffList.splice(staffList.indexOf(staffInTable), 1);
+              }
+            })
+          })
+          deleteDialogVisible.value = false;
+        } else {
+          console.log("删除员工信息失败");
+        }
+      })
+}
+
 // 获取所有部门数据
 const getDepartmentList = (): void => {
   departmentList.splice(0);
@@ -501,7 +562,14 @@ const getDepartmentList = (): void => {
   height: calc(100% - 56px);
 }
 
+.delete-dialog-layout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .staff-edit-title-container,
+.staff-delete-title-container,
 .staff-create-title-container,
 .staff-manage-title-container {
   display: flex;
@@ -510,6 +578,7 @@ const getDepartmentList = (): void => {
 }
 
 .staff-edit-title,
+.staff-delete-title,
 .staff-create-title,
 .staff-manage-title {
   align-self: center;
@@ -592,6 +661,14 @@ const getDepartmentList = (): void => {
   padding: 30px 20px;
 }
 
+.staff-delete-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: large;
+}
+
 .staff-edit-form-username,
 .staff-edit-form-name,
 .staff-edit-form-gender,
@@ -618,6 +695,14 @@ const getDepartmentList = (): void => {
   align-self: center;
   margin: 40px 0 0 0;
   width: 100%;
+}
+
+.staff-delete-dialog-btn {
+  align-self: center;
+  display: flex;
+  justify-content: space-around;
+  width: 75%;
+  margin-bottom: 30px;
 }
 
 .btn-group {

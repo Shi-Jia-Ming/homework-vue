@@ -250,7 +250,35 @@ export default class SpringAPI {
                 'Username': username
             }
         })
-            .then((_response: AxiosResponse<number>) => {
+            .then((_response: AxiosResponse<string>) => {
+                resultMap.set("code", 0);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 删除员工信息列表
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param staffList 待删除的员工信息列表
+     * @returns 删除状态
+     */
+    public static deleteStaff = async (token: string, id: number, username: string, staffList: Array<Staff>): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/staff/delete', JSON.stringify(staffList), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((_response: AxiosResponse<string>) => {
                 resultMap.set("code", 0);
             }).catch((error: AxiosError) => {
                 resultMap.set("code", 1);
