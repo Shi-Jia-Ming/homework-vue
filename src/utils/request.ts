@@ -230,4 +230,27 @@ export default class SpringAPI {
             })
         return resultMap;
     }
+
+    /**
+     * 删除文件
+     *
+     * @param fileName 待删除的文件名
+     * @returns 删除状态
+     */
+    public static deleteFile = async (fileName: string): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/upload/delete', {fileName: fileName}, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+            .then((_response: AxiosResponse<string>) => {
+                resultMap.set("code", 0);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
 }

@@ -129,9 +129,9 @@
               </el-select>
             </el-form-item>
             <el-form-item class="staff-create-form-image" label="图像">
-              <el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-                         :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-                <img v-if="newStaff.image" :src="`/api/${newStaff.image}`" class="avatar"/>
+              <el-upload class="avatar-uploader" action="/api/upload/image"
+                         :show-file-list="false" :on-success="handleAvatarSuccessCreate" :before-upload="beforeAvatarUploadCreate">
+                <el-image v-if="newStaff.image" :src="`/api/${newStaff.image}`" class="avatar" style="width: 178px; height: 178px;"/>
                 <el-icon v-else class="avatar-uploader-icon">
                   <plus/>
                 </el-icon>
@@ -152,7 +152,7 @@
             <el-form-item class="staff-create-form-department" label="归属部门">
               <el-select v-model="departmentId">
                 <el-option v-for="department in departmentList" :key="department.id"
-                           :label="department.name" :value="department.id" />
+                           :label="department.name" :value="department.id"/>
               </el-select>
             </el-form-item>
             <el-form-item class="staff-create-form-btn-group">
@@ -190,7 +190,7 @@
             <el-form-item class="staff-edit-form-image" label="图像">
               <el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
                          :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-                <img v-if="editStaff.image" :src="`/api/${editStaff.image}`" class="avatar"/>
+                <el-image v-if="editStaff.image" :src="`/api/${editStaff.image}`" class="avatar" style="width: 178px; height: 178px;"/>
                 <el-icon v-else class="avatar-uploader-icon">
                   <plus/>
                 </el-icon>
@@ -230,8 +230,9 @@ import {ComputedRef, Ref, computed, onMounted, reactive, ref, watch} from 'vue';
 import {useStore, Store} from 'vuex';
 import Staff from '../types/staff';
 import SpringAPI from '../utils/request';
-import {FormInstance} from 'element-plus';
+import {FormInstance, UploadProps} from 'element-plus';
 import Department from "../types/department.ts";
+import {AxiosResponse} from "axios";
 
 // 查询表单
 const searchForm: {
@@ -329,13 +330,25 @@ const reset = (formEl: FormInstance | undefined): void => {
 }
 
 // 用户上传图像之前回调
-const beforeAvatarUpload = (): void => {
-
+const beforeAvatarUploadCreate = (): UploadProps['beforeUpload'] => {
+  if (newStaff.image !== undefined) {
+    SpringAPI.deleteFile(newStaff.image)
+        .then((result: Map<string, Object>) => {
+          if (result.get("code") === 0) {
+            console.log("删除旧头像成功");
+            return true;
+          } else {
+            console.log("删除旧头像失败, 信息: ", result.get("msg") as string);
+            return false;
+          }
+        })
+  }
 }
 
 // 用户图像上传成功回调
-const handleAvatarSuccess = (): void => {
-
+const handleAvatarSuccessCreate = (response: string, _uploadFile): UploadProps['onSuccess'] => {
+  newStaff.image = response;
+  console.log("上传头像成功");
 }
 
 // 获取员工信息列表
@@ -369,7 +382,7 @@ const getStaffLikeList = (): void => {
   // 向后端发送请求
   SpringAPI.searchStaffLikeList(token.value, userId.value, username.value, staff)
       .then((result: Map<string, Object>) => {
-        if (result.get("code") == 0) {
+        if (result.get("code") === 0) {
           const _staffList: Array<Staff> = result.get("staff") as Array<Staff>;
           _staffList.forEach((_staff: Staff) => {
             staffList.push(_staff);
