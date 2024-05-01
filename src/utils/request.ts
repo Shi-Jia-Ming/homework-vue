@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios, {AxiosError, AxiosResponse} from "axios";
 import Department from "../types/department";
 import Staff from "../types/staff";
 
@@ -10,9 +10,7 @@ export default class SpringAPI {
 
     /**
      * 用户登录
-     * 
-     * @param username 用户名
-     * @param password 密码
+     * @param loginForm 用户登录信息
      * @returns 返回用户登录凭证
      */
     public static login = async (loginForm: { username: string, password: string }): Promise<Map<string, Object>> => {
@@ -36,7 +34,7 @@ export default class SpringAPI {
 
     /**
      * 获取所有部门信息
-     * 
+     *
      * @param token     用户 jwt 登录凭证
      * @param id        用户 id
      * @param username  用户名
@@ -64,11 +62,11 @@ export default class SpringAPI {
 
     /**
      * 新建部门
-     * 
+     *
      * @param token             用户 jwt 登录凭证
      * @param id                用户 id
      * @param username          用户名
-     * @param departmentName    部门名称
+     * @param department        新的部门信息
      * @returns 返回新建部门的 id
      */
     public static createDepartment = async (token: string, id: number, username: string, department: Department): Promise<Map<string, Object>> => {
@@ -93,14 +91,14 @@ export default class SpringAPI {
 
     /**
      * 更新部门信息
-     * 
+     *
      * @param token         用户 jwt 登录凭证
      * @param id            用户 id
      * @param username      用户名
      * @param department    新的部门信息
      * @returns 更新状态
      */
-    public static editDeparment = async (token: string, id: number, username: string, department: Department): Promise<Map<string, Object>> => {
+    public static editDepartment = async (token: string, id: number, username: string, department: Department): Promise<Map<string, Object>> => {
         const resultMap: Map<string, Object> = new Map();
 
         await axios.post(this.url + '/department/edit', JSON.stringify(department), {
@@ -121,7 +119,7 @@ export default class SpringAPI {
 
     /**
      * 删除部门信息
-     * 
+     *
      * @param token         用户 jwt 登录凭证
      * @param id            用户 id
      * @param username      用户名
@@ -149,7 +147,7 @@ export default class SpringAPI {
 
     /**
      * 获取所有员工信息
-     * 
+     *
      * @param token     用户 jwt 登录凭证
      * @param id        用户 id
      * @param username  用户名
@@ -168,6 +166,143 @@ export default class SpringAPI {
             .then((response: AxiosResponse<Array<Staff>>) => {
                 resultMap.set("code", 0);
                 resultMap.set("staff", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 根据部分员工信息进行模糊查询
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param staffLike 部分员工信息
+     * @returns 符合条件的员工列表
+     */
+    public static searchStaffLikeList = async (token: string, id: number, username: string, staffLike: Staff): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/staff/search', JSON.stringify(staffLike), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((response: AxiosResponse<Array<Staff>>) => {
+                resultMap.set("code", 0);
+                resultMap.set("staff", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 新建员工信息
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param staff     员工信息
+     * @returns 新建员工的 id
+     */
+    public static createStaff = async (token: string, id: number, username: string, staff: Staff): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/staff/create', JSON.stringify(staff), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((response: AxiosResponse<number>) => {
+                resultMap.set("code", 0);
+                resultMap.set("staffId", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 更改员工信息
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param staff     新的员工信息
+     * @returns 更改状态
+     */
+    public static editStaff = async (token: string, id: number, username: string, staff: Staff): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/staff/edit', JSON.stringify(staff), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((_response: AxiosResponse<string>) => {
+                resultMap.set("code", 0);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 删除员工信息列表
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param staffList 待删除的员工信息列表
+     * @returns 删除状态
+     */
+    public static deleteStaff = async (token: string, id: number, username: string, staffList: Array<Staff>): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/staff/delete', JSON.stringify(staffList), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((_response: AxiosResponse<string>) => {
+                resultMap.set("code", 0);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 删除文件
+     *
+     * @param fileName 待删除的文件名
+     * @returns 删除状态
+     */
+    public static deleteFile = async (fileName: string): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/upload/delete', {fileName: fileName}, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+            .then((_response: AxiosResponse<string>) => {
+                resultMap.set("code", 0);
             }).catch((error: AxiosError) => {
                 resultMap.set("code", 1);
                 resultMap.set("msg", error.response?.data!);
