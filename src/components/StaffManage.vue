@@ -117,13 +117,13 @@
         <div class="staff-create-form-container">
           <el-form class="staff-create-form" label-position="right" label-width="auto">
             <el-form-item class="staff-create-form-username" label="用户名">
-              <el-input v-model="newStaff.username"/>
+              <el-input v-model="newStaffObj.username"/>
             </el-form-item>
             <el-form-item class="staff-create-form-name" label="员工姓名">
-              <el-input v-model="newStaff.name"/>
+              <el-input v-model="newStaffObj.name"/>
             </el-form-item>
             <el-form-item class="staff-create-form-gender" label="性别">
-              <el-select v-model="newStaff.gender">
+              <el-select v-model="newStaffObj.gender">
                 <el-option label="男" :value="1"/>
                 <el-option label="女" :value="2"/>
               </el-select>
@@ -131,14 +131,14 @@
             <el-form-item class="staff-create-form-image" label="图像">
               <el-upload class="avatar-uploader" action="/api/upload/image"
                          :show-file-list="false" :on-success="handleAvatarSuccessCreate" :before-upload="beforeAvatarUploadCreate">
-                <el-image v-if="newStaff.image" :src="`/api/${newStaff.image}`" class="avatar" style="width: 178px; height: 178px;"/>
+                <el-image v-if="newStaffObj.image" :src="`/api/${newStaffObj.image}`" class="avatar" style="width: 178px; height: 178px;"/>
                 <el-icon v-else class="avatar-uploader-icon">
                   <plus/>
                 </el-icon>
               </el-upload>
             </el-form-item>
             <el-form-item class="staff-create-form-job" label="职位">
-              <el-select v-model="newStaff.job">
+              <el-select v-model="newStaffObj.job">
                 <el-option label="班主任" :value="1"/>
                 <el-option label="讲师" :value="2"/>
                 <el-option label="学工主管" :value="3"/>
@@ -147,7 +147,7 @@
               </el-select>
             </el-form-item>
             <el-form-item class="staff-create-form-entry-date" label="入职日期">
-              <el-date-picker v-model="newStaff.entryDate"/>
+              <el-date-picker v-model="newStaffObj.entryDate"/>
             </el-form-item>
             <el-form-item class="staff-create-form-department" label="归属部门">
               <el-select v-model="departmentId">
@@ -176,28 +176,28 @@
         <div class="staff-edit-form-container">
           <el-form class="staff-edit-form" label-position="right" label-width="auto">
             <el-form-item class="staff-edit-form-username" label="用户名">
-              <el-input v-model="editStaff.username"/>
+              <el-input v-model="editStaffObj.username"/>
             </el-form-item>
             <el-form-item class="staff-edit-form-name" label="员工姓名">
-              <el-input v-model="editStaff.name"/>
+              <el-input v-model="editStaffObj.name"/>
             </el-form-item>
             <el-form-item class="staff-edit-form-gender" label="性别">
-              <el-select v-model="editStaff.gender">
+              <el-select v-model="editStaffObj.gender">
                 <el-option label="男" :value="1"/>
                 <el-option label="女" :value="2"/>
               </el-select>
             </el-form-item>
             <el-form-item class="staff-edit-form-image" label="图像">
-              <el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-                         :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-                <el-image v-if="editStaff.image" :src="`/api/${editStaff.image}`" class="avatar" style="width: 178px; height: 178px;"/>
+              <el-upload class="avatar-uploader" action="/api/upload/image"
+                         :show-file-list="false" :on-success="handleAvatarSuccessEdit" :before-upload="beforeAvatarUploadEdit">
+                <el-image v-if="editStaffObj.image" :src="`/api/${editStaffObj.image}`" class="avatar" style="width: 178px; height: 178px;"/>
                 <el-icon v-else class="avatar-uploader-icon">
                   <plus/>
                 </el-icon>
               </el-upload>
             </el-form-item>
             <el-form-item class="staff-edit-form-job" label="职位">
-              <el-select v-model="editStaff.job">
+              <el-select v-model="editStaffObj.job">
                 <el-option label="班主任" :value="1"/>
                 <el-option label="讲师" :value="2"/>
                 <el-option label="学工主管" :value="3"/>
@@ -206,15 +206,17 @@
               </el-select>
             </el-form-item>
             <el-form-item class="staff-edit-form-entry-date" label="入职日期">
-              <el-date-picker v-model="editStaff.entryDate"/>
+              <el-date-picker v-model="editStaffObj.entryDate"/>
             </el-form-item>
             <el-form-item class="staff-edit-form-department" label="归属部门">
-              <el-select v-model="editStaff.department"/>
+              <el-select v-model="departmentId">
+                <el-option v-for="department in departmentList" :key="department.id" :value="department.id" :label="department.name" />
+              </el-select>
             </el-form-item>
             <el-form-item class="staff-edit-form-btn-group">
               <div class="btn-group">
-                <el-button type="primary" style="width: 150px; height: 40px;">确认</el-button>
-                <el-button type="info" style="width: 150px; height: 40px;">取消</el-button>
+                <el-button type="primary" style="width: 150px; height: 40px;" @click="editStaff">确认</el-button>
+                <el-button type="info" style="width: 150px; height: 40px;" @click="editDialogVisible = false">取消</el-button>
               </div>
             </el-form-item>
           </el-form>
@@ -232,7 +234,6 @@ import Staff from '../types/staff';
 import SpringAPI from '../utils/request';
 import {FormInstance, UploadProps} from 'element-plus';
 import Department from "../types/department.ts";
-import {AxiosResponse} from "axios";
 
 // 查询表单
 const searchForm: {
@@ -294,14 +295,14 @@ const username: ComputedRef<string> = computed(() => {
 // 新建员工信息窗口是否打开
 const createDialogVisible: Ref<boolean> = ref(false);
 // 新建员工的基本信息
-const newStaff: Staff = reactive<Staff>(new Staff());
-// 时选择的部门 id
+const newStaffObj: Staff = reactive<Staff>(new Staff());
+// 选择的部门 id
 const departmentId: Ref<number | undefined> = ref<number | undefined>();
 
 // 编辑员工信息窗口是否打开
 const editDialogVisible: Ref<boolean> = ref(false);
 // 编辑员工的基本信息
-const editStaff: Staff = reactive<Staff>(new Staff());
+const editStaffObj: Staff = reactive<Staff>(new Staff());
 
 onMounted(() => {
   getStaffList();
@@ -310,16 +311,21 @@ onMounted(() => {
 
 // 打开新建员工信息的窗口
 const openCreateDialog = (): void => {
-  // 将 newStaff 设置为初始值
-  newStaff.setUndefined();
-  createDialogVisible.value = true;
+  // 将部门 id 清零
+  departmentId.value = undefined;
   // 查询所有部门数据
   getDepartmentList();
+  // 将 newStaff 设置为初始值
+  newStaffObj.setUndefined();
+  createDialogVisible.value = true;
 }
 // 打开编辑员工信息的窗口
 const openEditDialog = (staff: Staff): void => {
-  // 为 editStaff 赋值
-  editStaff.setValue(staff);
+  // 查询所有部门数据
+  getDepartmentList();
+  // 为 editStaffObj 赋值
+  editStaffObj.setValue(staff);
+  departmentId.value = editStaffObj.department?.id;
   editDialogVisible.value = true;
 }
 
@@ -331,8 +337,23 @@ const reset = (formEl: FormInstance | undefined): void => {
 
 // 用户上传图像之前回调
 const beforeAvatarUploadCreate = (): UploadProps['beforeUpload'] => {
-  if (newStaff.image !== undefined) {
-    SpringAPI.deleteFile(newStaff.image)
+  if (newStaffObj.image !== undefined) {
+    SpringAPI.deleteFile(newStaffObj.image)
+        .then((result: Map<string, Object>) => {
+          if (result.get("code") === 0) {
+            console.log("删除旧头像成功");
+            return true;
+          } else {
+            console.log("删除旧头像失败, 信息: ", result.get("msg") as string);
+            return false;
+          }
+        })
+  }
+}
+
+const beforeAvatarUploadEdit = (): UploadProps['beforeUpload'] => {
+  if (editStaffObj.image !== undefined) {
+    SpringAPI.deleteFile(editStaffObj.image)
         .then((result: Map<string, Object>) => {
           if (result.get("code") === 0) {
             console.log("删除旧头像成功");
@@ -347,7 +368,12 @@ const beforeAvatarUploadCreate = (): UploadProps['beforeUpload'] => {
 
 // 用户图像上传成功回调
 const handleAvatarSuccessCreate = (response: string, _uploadFile): UploadProps['onSuccess'] => {
-  newStaff.image = response;
+  newStaffObj.image = response;
+  console.log("上传头像成功");
+}
+
+const handleAvatarSuccessEdit = (response: string, _uploadFile): UploadProps['onSuccess'] => {
+  editStaffObj.image = response;
   console.log("上传头像成功");
 }
 
@@ -397,27 +423,54 @@ const getStaffLikeList = (): void => {
 // 新建员工信息
 const createStaff = async (): void => {
   // 填充默认信息
-  newStaff.password = "123456";
-  newStaff.createAt = new Date();
-  newStaff.updateAt = new Date();
+  newStaffObj.password = "123456";
+  newStaffObj.createAt = new Date();
+  newStaffObj.updateAt = new Date();
   // 填充部门信息
   departmentList.forEach((department: Department) => {
     if (department.id === departmentId.value) {
-      newStaff.department = department;
+      newStaffObj.department = department;
     }
   })
   // 向后端发送请求
-  await SpringAPI.createStaff(token.value, userId.value, username.value, newStaff)
+  await SpringAPI.createStaff(token.value, userId.value, username.value, newStaffObj)
       .then((result: Map<string, Object>) => {
         if (result.get("code") === 0) {
           // 新建成功
-          newStaff.id = result.get("staffId") as number;
-          console.log(newStaff);
-          staffList.push(newStaff);
+          newStaffObj.id = result.get("staffId") as number;
+          console.log(newStaffObj);
+          staffList.push(newStaffObj);
           createDialogVisible.value = false;
           console.log("新建员工信息成功");
         } else {
           console.log("新建员工信息失败，信息：", result.get("msg") as string);
+        }
+      })
+}
+
+// 更改员工信息
+const editStaff = async (): void => {
+  await SpringAPI.editStaff(token.value, userId.value, username.value, editStaffObj)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 更改成功
+          staffList.forEach((staff: Staff) => {
+            if (staff.id === editStaffObj.id) {
+              // 更新界面的数据
+              staff.username = editStaffObj.username;
+              staff.name = editStaffObj.name;
+              staff.gender = editStaffObj.gender;
+              staff.image = editStaffObj.image;
+              staff.job = editStaffObj.job;
+              staff.entryDate = editStaffObj.entryDate;
+              staff.department = editStaffObj.department;
+              staff.updateAt = new Date();
+            }
+          })
+          console.log("员工信息更新成功");
+          editDialogVisible.value = false;
+        } else {
+          console.log("员工信息更新失败");
         }
       })
 }
@@ -553,7 +606,7 @@ const getDepartmentList = (): void => {
 .staff-create-form-job,
 .staff-create-form-entry-date,
 .staff-create-form-entry-department,
-staff-create-form-class {
+.staff-create-form-class {
   margin: 20px 0;
 }
 

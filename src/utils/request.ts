@@ -232,6 +232,34 @@ export default class SpringAPI {
     }
 
     /**
+     * 更改员工信息
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param staff     新的员工信息
+     * @returns 更改状态
+     */
+    public static editStaff = async (token: string, id: number, username: string, staff: Staff): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + '/staff/edit', JSON.stringify(staff), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((_response: AxiosResponse<number>) => {
+                resultMap.set("code", 0);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
      * 删除文件
      *
      * @param fileName 待删除的文件名
