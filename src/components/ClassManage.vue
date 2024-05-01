@@ -5,18 +5,18 @@
     </div>
     <div class="search-group">
       <!-- 查询班级的表单 -->
-      <el-form :inline="true" style="width: 100%; display: flex; justify-content: flex-start;">
-        <el-form-item label="班级名称" class="class-name-container">
-          <el-input style="width: 200px; height: 35px;"/>
+      <el-form :inline="true" style="width: 100%; display: flex; justify-content: flex-start;" :model="searchForm" ref="searchFormRef">
+        <el-form-item label="班级名称" class="class-name-container" prop="name">
+          <el-input style="width: 200px; height: 35px;" v-model="searchForm.name"/>
         </el-form-item>
 
-        <el-form-item label="结课时间" class="class-time-container">
+        <el-form-item label="结课时间" class="class-time-container" prop="startDate">
           <el-date-picker type="daterange" range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"
-                          style="width: 200px; height: 35px;"/>
+                          style="width: 200px; height: 35px;" v-model="searchForm.date"/>
         </el-form-item>
 
-        <el-form-item class="search-btn-container">
-          <el-button type="primary" class="search-btn">查询</el-button>
+        <el-form-item class="search-btn-container" prop="endDate">
+          <el-button type="info" class="search-btn" @click="reset(searchFormRef)">清空</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -82,14 +82,33 @@
 import {Plus} from '@element-plus/icons-vue';
 import Class from "../types/class.ts";
 import {Store, useStore} from 'vuex';
-import {ComputedRef, onMounted, reactive, Ref, ref, computed} from "vue";
+import {ComputedRef, onMounted, reactive, Ref, ref, computed, watch} from "vue";
 import SpringAPI from "../utils/request.ts";
 
 // 用户全局状态
 const store: Store<any> = useStore();
 
+// 表单控制器
+const searchFormRef = ref<FormInstance>();
+
+// 条件查询的班级的部分信息
+const partClass: Ref<Class> = ref(new Class());
+
 // 条件查询的表单
-const searchForm: Class = reactive<Class>(new Class());
+const searchForm: {
+  name: string | undefined,
+  date: Array<Date | undefined>
+} = reactive({
+  name: undefined,
+  date: [undefined, undefined]
+});
+
+watch(searchForm, () => {
+  partClass.value.name = searchForm.name;
+  partClass.value.startDate = searchForm.date[0];
+  partClass.value.endDate = searchForm.date[1];
+  searchClassLikeList();
+});
 
 // 班级列表
 const classList: Array<Class> = reactive<Class>([]);
@@ -123,10 +142,17 @@ const username: ComputedRef<string> = computed(() => {
 
 onMounted(() => {
   getClassList();
-})
+});
+
+// 重置表单
+const reset = (formEl: FormInstance | undefined): void => {
+  if (!formEl) return;
+  formEl.resetFields();
+}
 
 // 获取班级列表
 const getClassList = (): void => {
+  classList.splice(0);
   SpringAPI.getClassList(token.value, userId.value, username.value)
       .then((result: Map<string, Object>) => {
         if (result.get("code") === 0) {
@@ -138,6 +164,23 @@ const getClassList = (): void => {
           console.log("获取班级列表成功, 班级列表: ", classList);
         } else {
           console.log("获取班级列表失败, 信息: ", result.get("msg") as string);
+        }
+      })
+}
+
+const searchClassLikeList = (): void => {
+  classList.splice(0);
+  SpringAPI.searchClassLikeList(token.value, userId.value, username.value, partClass.value)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 获取班级列表成功
+          const _classList = result.get("classes") as Array<Class>;
+          _classList.forEach((class_: Class) => {
+            classList.push(class_);
+          })
+          console.log("模糊查询成功");
+        } else {
+          console.log("模糊查询失败, 信息: ", result.get("msg") as string);
         }
       })
 }

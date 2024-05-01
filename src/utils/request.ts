@@ -2,6 +2,7 @@ import axios, {AxiosError, AxiosResponse} from "axios";
 import Department from "../types/department";
 import Staff from "../types/staff";
 import Student from "../types/student.ts";
+import Class from "../types/class.ts";
 
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
@@ -306,6 +307,35 @@ export default class SpringAPI {
             }
         })
             .then((response: AxiosResponse<Array<Student>>) => {
+                resultMap.set("code", 0);
+                resultMap.set("classes", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 根据部分班级信息进行模糊查询
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param classLike 部分班级信息
+     * @returns 符合条件的员工列表
+     */
+    public static searchClassLikeList = async (token: string, id: number, username: string, classLike: Class): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + 'class/search', JSON.stringify(classLike), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((response: AxiosResponse<Array<Class>>) => {
                 resultMap.set("code", 0);
                 resultMap.set("classes", response.data);
             }).catch((error: AxiosError) => {

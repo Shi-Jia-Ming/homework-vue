@@ -252,7 +252,6 @@ import Staff from '../types/staff';
 import SpringAPI from '../utils/request';
 import {FormInstance, UploadProps} from 'element-plus';
 import Department from "../types/department.ts";
-import {FALSE} from "sass";
 
 // 查询表单
 const searchForm: {
