@@ -7,19 +7,19 @@
       <!-- 查询学员的表单 -->
       <el-form :inline="true" style="width: 100%; display: flex; justify-content: flex-start;">
         <el-form-item label="学员姓名" class="student-name-container">
-          <el-input style="width: 180px; height: 35px;" />
+          <el-input style="width: 180px; height: 35px;"/>
         </el-form-item>
 
         <el-form-item label="学号" class="student-time-container">
-          <el-input style="width: 180px; height: 35px;" />
+          <el-input style="width: 180px; height: 35px;"/>
         </el-form-item>
 
         <el-form-item label="最高学历" class="student-degree-container">
-          <el-select style="width: 180px; height: 35px;" />
+          <el-select style="width: 180px; height: 35px;"/>
         </el-form-item>
 
         <el-form-item label="所属班级" class="student-class-container">
-          <el-select style="width: 180px; height: 35px;" />
+          <el-select style="width: 180px; height: 35px;"/>
         </el-form-item>
 
         <el-form-item class="search-btn-container">
@@ -31,7 +31,7 @@
       <el-button type="primary" class="add-btn" @click="openCreateDialog">
         <template #icon>
           <el-icon :size="15" style="margin-right: 5px;">
-            <plus />
+            <plus/>
           </el-icon>
           <p>添加学员</p>
         </template>
@@ -40,24 +40,40 @@
       <el-button type="primary" class="add-btn">
         <template #icon>
           <el-icon :size="15" style="margin-right: 5px;">
-            <minus />
+            <minus/>
           </el-icon>
           <p>批量删除</p>
         </template>
       </el-button>
     </div>
     <div class="student-table-container">
-      <el-table stripe style="width: 100%" class="student-table">
-        <el-table-column type="selection" width="55" />
-        <el-table-column fixed="left" prop="name" label="姓名" width="170" />
-        <el-table-column prop="number" label="学号" width="170" />
-        <el-table-column prop="class" label="班级" width="170" />
-        <el-table-column prop="gender" label="性别" width="170" />
-        <el-table-column prop="phone" label="手机号" width="170" />
-        <el-table-column prop="degree" label="最高学历" width="170" />
-        <el-table-column prop="disciplinary" label="违纪次数" width="170" />
-        <el-table-column prop="minus" label="违纪扣分" width="170" />
-        <el-table-column prop="updatedAt" label="最后操作时间" width="170" />
+      <el-table stripe style="width: 100%" class="student-table" :data="studentList">
+        <el-table-column type="selection" width="55"/>
+        <el-table-column fixed="left" prop="name" label="姓名" width="170"/>
+        <el-table-column prop="stuNumber" label="学号" width="170"/>
+        <el-table-column prop="class" label="班级" width="170">
+          <template #default="scope">
+            <p>{{ scope.row.class_.name }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column prop="gender" label="性别" width="170">
+          <template #default="scope">
+            <p>{{ scope.row.gender === 1 ? "男" : "女" }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column prop="phone" label="手机号" width="170"/>
+        <el-table-column prop="degree" label="最高学历" width="170">
+          <template #default="scope">
+            <p>{{ scope.row.degree === 1 ? "本科" : "大专" }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column prop="breakCount" label="违纪次数" width="170"/>
+        <el-table-column prop="minus" label="违纪扣分" width="170"/>
+        <el-table-column prop="updatedAt" label="最后操作时间" width="170">
+          <template #default="scope">
+            <p>{{ new Date(scope.row.updateAt).toLocaleDateString() }}</p>
+          </template>
+        </el-table-column>
         <el-table-column fixed="right" label="操作" width="170">
           <template #default>
             <el-button link type="primary" size="small">
@@ -75,13 +91,15 @@
       <div class="page-configuration">
         <div class="page-number-select">
           <p>每页展示的学员数：</p>
-          <el-select multiple placeholder="选择" style="width: 100px">
-            <el-option v-for="item in [10, 20, 50, 100]" :key="item" :label="item" :value="item" />
+          <el-select placeholder="选择" style="width: 100px" v-model="pageNumber">
+            <el-option v-for="item in pageNumberList" :key="item" :label="item" :value="item"/>
           </el-select>
         </div>
         <div class="page-select">
-          <p>共{{ 500 }}条数据</p>
-          <el-pagination background layout="prev, pager, next, jumper" :total="10" class="pagination" />
+          <p>共{{ studentList.length }}条数据</p>
+          <el-pagination background layout="prev, pager, next, jumper" :total="studentList.length"
+                         :page-size="Number(pageNumber)" class="pagination" v-model:current-page="page"
+                         :default-current-page="1"/>
         </div>
       </div>
     </div>
@@ -111,8 +129,8 @@
             </el-form-item>
             <el-form-item class="staff-create-form-degree" label="最高学历">
               <el-select v-model="newStudent.degree">
-                <el-option label="本科" :value="1" />
-                <el-option label="大专" :value="2" />
+                <el-option label="本科" :value="1"/>
+                <el-option label="大专" :value="2"/>
               </el-select>
             </el-form-item>
             <el-form-item class="staff-create-form-class" label="所属班级">
@@ -145,8 +163,8 @@
             </el-form-item>
             <el-form-item class="staff-edit-form-gender" label="性别">
               <el-select v-model="editStudent.gender">
-                <el-option label="男" :value="1" />
-                <el-option label="女" :value="2" />
+                <el-option label="男" :value="1"/>
+                <el-option label="女" :value="2"/>
               </el-select>
             </el-form-item>
             <el-form-item class="staff-edit-form-phone" label="手机号">
@@ -154,12 +172,12 @@
             </el-form-item>
             <el-form-item class="staff-edit-form-degree" label="最高学历">
               <el-select v-model="editStudent.degree">
-                <el-option label="本科" :value="1" />
-                <el-option label="大专" :value="2" />
+                <el-option label="本科" :value="1"/>
+                <el-option label="大专" :value="2"/>
               </el-select>
             </el-form-item>
             <el-form-item class="staff-edit-form-class" label="所属班级">
-              <el-select  v-model="editStudent.class_"/>
+              <el-select v-model="editStudent.class_"/>
             </el-form-item>
             <el-form-item class="staff-edit-form-btn-group">
               <div class="btn-group">
@@ -175,9 +193,44 @@
 </template>
 
 <script setup lang="ts">
-import { Plus, Minus } from '@element-plus/icons-vue';
-import { Ref, reactive, ref } from 'vue';
+import {Plus, Minus} from '@element-plus/icons-vue';
+import {Ref, reactive, ref, ComputedRef, computed, onMounted} from 'vue';
 import Student from '../types/student';
+import {Store, useStore} from "vuex";
+import SpringAPI from "../utils/request.ts";
+
+// 学生信息列表
+const studentList: Array<Student> = reactive<Array<Student>>([]);
+
+// 表格上展示的信息列表
+const listInTable: ComputedRef<Array<Student>> = computed(() => {
+  const start: number = (page.value - 1) * Number(pageNumber.value);
+  const end: number = Math.min(page.value * Number(pageNumber.value), studentList.length);
+  return studentList.slice(start, end);
+});
+
+// 用户全局状态
+const store: Store<any> = useStore();
+
+// 每页展示的信息条数
+const pageNumber: Ref<string> = ref('10');
+
+// 当前页数
+const page: Ref<number> = ref(1);
+
+// 每页可展示的信息数列表
+const pageNumberList: number[] = [10, 20, 50, 100];
+
+// 定义用户信息
+const userId: ComputedRef<number> = computed(() => {
+  return store.state.user.userId
+});
+const token: ComputedRef<string> = computed(() => {
+  return store.state.user.token
+});
+const username: ComputedRef<string> = computed(() => {
+  return store.state.user.username
+});
 
 // 新建学生信息窗口是否打开
 const createDialogVisible: Ref<boolean> = ref(false);
@@ -189,9 +242,30 @@ const editDialogVisible: Ref<boolean> = ref(false);
 // 编辑学生的基本信息
 const editStudent: Student = reactive<Student>(new Student());
 
+onMounted(() => {
+  getStudentList();
+})
+
 // 打开新建学生信息窗口
 const openCreateDialog = (): void => {
   createDialogVisible.value = true;
+}
+
+// 获取学生信息列表
+const getStudentList = (): void => {
+  SpringAPI.getStudentList(token.value, userId.value, username.value)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 获取学生信息列表成功
+          const studentList_: Array<Student> = result.get("studentList") as Array<Student>;
+          studentList_.forEach((student: Student) => {
+            studentList.push(student);
+          })
+          console.log("获取学生信息列表成功, 数据: ", studentList);
+        } else {
+          console.log("获取学生信息列表失败, 信息: ", result.get("msg") as string);
+        }
+      })
 }
 </script>
 
@@ -245,7 +319,7 @@ const openCreateDialog = (): void => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
+  height: calc(100% - 150px);
   width: 90%;
   margin-top: 20px;
 }
