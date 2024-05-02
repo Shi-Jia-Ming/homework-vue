@@ -252,7 +252,6 @@ import Staff from '../types/staff';
 import SpringAPI from '../utils/request';
 import {FormInstance, UploadProps} from 'element-plus';
 import Department from "../types/department.ts";
-import {FALSE} from "sass";
 
 // 查询表单
 const searchForm: {
@@ -475,7 +474,7 @@ const createStaff = async (): void => {
         if (result.get("code") === 0) {
           // 新建成功
           newStaffObj.id = result.get("staffId") as number;
-          console.log(newStaffObj);
+          // TODO push不能push原对象
           staffList.push(newStaffObj);
           createDialogVisible.value = false;
           console.log("新建员工信息成功");
@@ -529,7 +528,6 @@ const deleteStaff = async (): void => {
           staffListToDelete.forEach((staffToDel) => {
             staffList.forEach((staffInTable: Staff) => {
               if (staffInTable.id === staffToDel.id) {
-                console.log(staffList.indexOf(staffInTable));
                 staffList.splice(staffList.indexOf(staffInTable), 1);
               }
             })
