@@ -21,7 +21,7 @@
       </el-form>
     </div>
     <div class="add-btn-container">
-      <el-button type="primary" class="add-btn">
+      <el-button type="primary" class="add-btn" @click="openCreateDialog">
         <template #icon>
           <el-icon :size="15" style="margin-right: 5px;">
             <plus/>
@@ -50,11 +50,11 @@
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="170">
-          <template #default>
+          <template #default="scope">
             <el-button link type="primary" size="small">
               编辑
             </el-button>
-            <el-button link type="primary" size="small">
+            <el-button link type="primary" size="small" @click="openDeleteDialog(scope.row)">
               删除
             </el-button>
           </template>
@@ -75,6 +75,61 @@
         </div>
       </div>
     </div>
+
+    <!-- 创建课程窗口 -->
+    <el-dialog v-model="createDialogVisible" width="800" draggable>
+      <div class="staff-create-dialog-layout">
+        <div class="staff-create-title-container">
+          <p class="staff-create-title">添加班级信息</p>
+        </div>
+        <div class="staff-create-form-container">
+          <el-form class="staff-create-form" label-position="right" label-width="auto">
+            <el-form-item class="staff-create-form-username" label="班级名称">
+              <el-input v-model="createClassObj.name"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-name" label="班级教室">
+              <el-input v-model="createClassObj.classroom"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-name" label="开课时间">
+              <el-date-picker v-model="createClassObj.startDate"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-name" label="结课时间">
+              <el-date-picker v-model="createClassObj.endDate"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-gender" label="班主任">
+              <el-select v-model="selectedStaffId">
+                <el-option  v-for="headTeacher in headTeacherList" :label="headTeacher.name" :value="headTeacher.id"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item class="staff-create-form-btn-group">
+              <div class="btn-group">
+                <el-button type="primary" style="width: 150px; height: 40px;" @click="createClass">创建</el-button>
+                <el-button type="info" style="width: 150px; height: 40px;" @click="createDialogVisible = false">取消
+                </el-button>
+              </div>
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- 删除班级窗口 -->
+    <el-dialog v-model="deleteDialogVisible" width="800" draggable>
+      <div class="delete-dialog-layout">
+        <div class="staff-delete-title-container">
+          <p class="staff-delete-title">删除班级信息</p>
+        </div>
+        <div class="staff-delete-form-container">
+          <div class="staff-name-input-container">
+            <span class="staff-name-input-label">您确定要删除该班级信息吗？</span>
+          </div>
+        </div>
+        <div class="staff-delete-dialog-btn">
+          <el-button type="primary" style="width: 150px; height: 40px;" @click="deleteClass">确认</el-button>
+          <el-button type="info" style="width: 150px; height: 40px;" @click="deleteDialogVisible = false">取消</el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -84,6 +139,8 @@ import Class from "../types/class.ts";
 import {Store, useStore} from 'vuex';
 import {ComputedRef, onMounted, reactive, Ref, ref, computed, watch} from "vue";
 import SpringAPI from "../utils/request.ts";
+import {FormInstance} from "element-plus";
+import Staff from "../types/staff.ts";
 
 // 用户全局状态
 const store: Store<any> = useStore();
@@ -112,6 +169,8 @@ watch(searchForm, () => {
 
 // 班级列表
 const classList: Array<Class> = reactive<Class>([]);
+// 班主任信息列表
+const headTeacherList: Array<Staff> = reactive<Staff>([]);
 
 // 每页展示的信息条数
 const pageNumber: Ref<string> = ref<string>('10');
@@ -140,9 +199,35 @@ const username: ComputedRef<string> = computed(() => {
   return store.state.user.username
 });
 
+// 新建班级信息窗口是否打开
+const createDialogVisible: Ref<boolean> = ref(false);
+// 新建班级信息的对象
+const createClassObj: Class = reactive(new Class());
+// 选中的职员 id
+const selectedStaffId: Ref<number | undefined> = ref();
+
+// 删除班级信息窗口是否打开
+const deleteDialogVisible: Ref<boolean> = ref(false);
+// 删除的班级对象
+const deleteClassObj: Class = reactive(new Class());
+
 onMounted(() => {
   getClassList();
 });
+
+// 打开新建课程窗口
+const openCreateDialog = (): void => {
+  selectedStaffId.value = undefined;
+  // 重置 createClassObj
+  createClassObj.setUndefined();
+  getHeadTeacherList();
+  createDialogVisible.value = true;
+}
+// 打开删除课程窗口
+const openDeleteDialog = (class_: Class): void => {
+  deleteClassObj.setValue(class_);
+  deleteDialogVisible.value = true;
+}
 
 // 重置表单
 const reset = (formEl: FormInstance | undefined): void => {
@@ -168,6 +253,7 @@ const getClassList = (): void => {
       })
 }
 
+// 根据部分信息进行模糊查询
 const searchClassLikeList = (): void => {
   classList.splice(0);
   SpringAPI.searchClassLikeList(token.value, userId.value, username.value, partClass.value)
@@ -181,6 +267,71 @@ const searchClassLikeList = (): void => {
           console.log("模糊查询成功");
         } else {
           console.log("模糊查询失败, 信息: ", result.get("msg") as string);
+        }
+      })
+}
+
+// 新增班级数据
+const createClass = async (): Promise<void> => {
+  // 填充默认信息
+  createClassObj.updateAt = new Date();
+  createClassObj.createAt = new Date();
+  // 填充班主任信息
+  headTeacherList.forEach((headTeacher: Staff) => {
+    if (headTeacher.id === selectedStaffId.value) {
+      createClassObj.headTeacher = headTeacher;
+    }
+  })
+  // 向后端发送请求
+  await SpringAPI.createClass(token.value, userId.value, username.value, createClassObj)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 新建成功
+          createClassObj.id = result.get("classId") as number;
+          const copy: Class = new Class();
+          copy.setValue(createClassObj);
+          classList.push(copy);
+          createDialogVisible.value = false;
+          console.log("新建班级信息成功");
+        } else {
+          console.log("新建班级信息失败, 信息: ", result.get("msg") as string);
+        }
+      })
+}
+
+// 删除班级数据
+const deleteClass = async (): Promise<void> => {
+  SpringAPI.deleteClass(token.value, userId.value, username.value, deleteClassObj)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 删除成功
+          classList.forEach((classToDel: Class) => {
+            if (classToDel.id === deleteClassObj.id) {
+              classList.splice(classList.indexOf(classToDel), 1);
+            }
+            console.log("删除班级信息成功");
+          })
+          deleteDialogVisible.value = false;
+        } else {
+          console.log("删除班级信息失败, 信息: ", result.get("msg") as string);
+        }
+      })
+}
+
+// 获取班主任信息列表
+const getHeadTeacherList = (): void => {
+  headTeacherList.splice(0);
+  SpringAPI.getHeadTeacher(token.value, userId.value, username.value)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 获取信息成功
+          const headTeacherList_ = result.get("headTeacherList") as Array<Staff>;
+          headTeacherList_.forEach((headTeacher: Staff) => {
+            headTeacherList.push(headTeacher);
+          })
+          console.log("获取班主任信息列表成功");
+        } else {
+          console.log("获取班主任信息列表失败, 信息; ", result.get("msg") as string);
         }
       })
 }
