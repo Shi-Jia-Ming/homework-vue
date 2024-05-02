@@ -78,30 +78,30 @@
 
     <!-- 创建课程窗口 -->
     <el-dialog v-model="createDialogVisible" width="800" draggable>
-      <div class="staff-create-dialog-layout">
-        <div class="staff-create-title-container">
-          <p class="staff-create-title">添加班级信息</p>
+      <div class="class-create-dialog-layout">
+        <div class="class-create-title-container">
+          <p class="class-create-title">添加班级信息</p>
         </div>
-        <div class="staff-create-form-container">
-          <el-form class="staff-create-form" label-position="right" label-width="auto">
-            <el-form-item class="staff-create-form-username" label="班级名称">
+        <div class="class-create-form-container">
+          <el-form class="class-create-form" label-position="right" label-width="auto">
+            <el-form-item class="class-create-form-name" label="班级名称">
               <el-input v-model="createClassObj.name"/>
             </el-form-item>
-            <el-form-item class="staff-create-form-name" label="班级教室">
+            <el-form-item class="class-create-form-classroom" label="班级教室">
               <el-input v-model="createClassObj.classroom"/>
             </el-form-item>
-            <el-form-item class="staff-create-form-name" label="开课时间">
+            <el-form-item class="class-create-form-start-time" label="开课时间">
               <el-date-picker v-model="createClassObj.startDate"/>
             </el-form-item>
-            <el-form-item class="staff-create-form-name" label="结课时间">
+            <el-form-item class="class-create-form-end-time" label="结课时间">
               <el-date-picker v-model="createClassObj.endDate"/>
             </el-form-item>
-            <el-form-item class="staff-create-form-gender" label="班主任">
+            <el-form-item class="class-create-form-head-teacher" label="班主任">
               <el-select v-model="selectedStaffId">
                 <el-option  v-for="headTeacher in headTeacherList" :label="headTeacher.name" :value="headTeacher.id"/>
               </el-select>
             </el-form-item>
-            <el-form-item class="staff-create-form-btn-group">
+            <el-form-item class="class-create-form-btn-group">
               <div class="btn-group">
                 <el-button type="primary" style="width: 150px; height: 40px;" @click="createClass">创建</el-button>
                 <el-button type="info" style="width: 150px; height: 40px;" @click="createDialogVisible = false">取消
@@ -115,30 +115,30 @@
 
     <!-- 更新班级弹窗 -->
     <el-dialog v-model="editDialogVisible" width="800" draggable>
-      <div class="staff-create-dialog-layout">
-        <div class="staff-create-title-container">
-          <p class="staff-create-title">添加班级信息</p>
+      <div class="class-create-dialog-layout">
+        <div class="class-create-title-container">
+          <p class="class-create-title">修改班级信息</p>
         </div>
-        <div class="staff-create-form-container">
-          <el-form class="staff-create-form" label-position="right" label-width="auto">
-            <el-form-item class="staff-create-form-username" label="班级名称">
+        <div class="class-create-form-container">
+          <el-form class="class-create-form" label-position="right" label-width="auto">
+            <el-form-item class="class-create-form-username" label="班级名称">
               <el-input v-model="editClassObj.name"/>
             </el-form-item>
-            <el-form-item class="staff-create-form-name" label="班级教室">
+            <el-form-item class="class-edit-form-classroom" label="班级教室">
               <el-input v-model="editClassObj.classroom"/>
             </el-form-item>
-            <el-form-item class="staff-create-form-name" label="开课时间">
+            <el-form-item class="class-edit-form-start-time" label="开课时间">
               <el-date-picker v-model="editClassObj.startDate"/>
             </el-form-item>
-            <el-form-item class="staff-create-form-name" label="结课时间">
+            <el-form-item class="class-edit-form-end-time" label="结课时间">
               <el-date-picker v-model="editClassObj.endDate"/>
             </el-form-item>
-            <el-form-item class="staff-create-form-gender" label="班主任">
+            <el-form-item class="class-edit-form-head-teacher" label="班主任">
               <el-select v-model="selectedStaffId">
                 <el-option  v-for="headTeacher in headTeacherList" :label="headTeacher.name" :value="headTeacher.id"/>
               </el-select>
             </el-form-item>
-            <el-form-item class="staff-create-form-btn-group">
+            <el-form-item class="class-edit-form-btn-group">
               <div class="btn-group">
                 <el-button type="primary" style="width: 150px; height: 40px;" @click="editClass">确认</el-button>
                 <el-button type="info" style="width: 150px; height: 40px;" @click="editDialogVisible = false">取消
@@ -153,15 +153,15 @@
     <!-- 删除班级窗口 -->
     <el-dialog v-model="deleteDialogVisible" width="800" draggable>
       <div class="delete-dialog-layout">
-        <div class="staff-delete-title-container">
-          <p class="staff-delete-title">删除班级信息</p>
+        <div class="class-delete-title-container">
+          <p class="class-delete-title">删除班级信息</p>
         </div>
-        <div class="staff-delete-form-container">
-          <div class="staff-name-input-container">
-            <span class="staff-name-input-label">您确定要删除该班级信息吗？</span>
+        <div class="class-delete-form-container">
+          <div class="class-name-input-container">
+            <span class="class-name-input-label">您确定要删除该班级信息吗？</span>
           </div>
         </div>
-        <div class="staff-delete-dialog-btn">
+        <div class="class-delete-dialog-btn">
           <el-button type="primary" style="width: 150px; height: 40px;" @click="deleteClass">确认</el-button>
           <el-button type="info" style="width: 150px; height: 40px;" @click="deleteDialogVisible = false">取消</el-button>
         </div>
@@ -430,12 +430,18 @@ const getHeadTeacherList = (): void => {
   height: calc(100% - 56px);
 }
 
+.class-delete-title-container,
+.class-create-title-container,
+.class-edit-title-container,
 .class-manage-title-container {
   display: flex;
   border-left: 6px #1da8ed solid;
   height: 35px;
 }
 
+.class-create-title,
+.class-delete-title,
+.class-edit-title,
 .class-manage-title {
   align-self: center;
   margin-left: 15px;
@@ -504,5 +510,66 @@ const getHeadTeacherList = (): void => {
 
 .pagination {
   margin-left: 20px;
+}
+
+.class-create-dialog-layout {
+  margin: auto;
+}
+
+.class-create-form-container {
+  align-self: center;
+  padding: 30px 20px;
+}
+
+.class-create-form-name,
+.class-create-form-start-time,
+.class-create-form-end-time,
+.class-create-form-head-teacher,
+.class-create-form-classroom,
+.class-edit-form-name,
+.class-edit-form-start-time,
+.class-edit-form-end-time,
+.class-edit-form-head-teacher,
+.class-edit-form-classroom {
+  margin: 20px 0;
+}
+
+.class-edit-form-btn-group,
+.class-create-form-btn-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  margin: 40px 0 0 0;
+  width: 100%;
+}
+
+.btn-group {
+  display: flex;
+  justify-content: space-around;
+  width: 75%;
+  margin: auto;
+}
+
+.delete-dialog-layout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.class-delete-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: large;
+}
+
+.class-delete-dialog-btn {
+  align-self: center;
+  display: flex;
+  justify-content: space-around;
+  width: 75%;
+  margin-bottom: 30px;
 }
 </style>
