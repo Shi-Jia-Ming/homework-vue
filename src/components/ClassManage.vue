@@ -51,7 +51,7 @@
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="170">
           <template #default="scope">
-            <el-button link type="primary" size="small">
+            <el-button link type="primary" size="small" @click="openEditDialog(scope.row)">
               编辑
             </el-button>
             <el-button link type="primary" size="small" @click="openDeleteDialog(scope.row)">
@@ -105,6 +105,43 @@
               <div class="btn-group">
                 <el-button type="primary" style="width: 150px; height: 40px;" @click="createClass">创建</el-button>
                 <el-button type="info" style="width: 150px; height: 40px;" @click="createDialogVisible = false">取消
+                </el-button>
+              </div>
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- 更新班级弹窗 -->
+    <el-dialog v-model="editDialogVisible" width="800" draggable>
+      <div class="staff-create-dialog-layout">
+        <div class="staff-create-title-container">
+          <p class="staff-create-title">添加班级信息</p>
+        </div>
+        <div class="staff-create-form-container">
+          <el-form class="staff-create-form" label-position="right" label-width="auto">
+            <el-form-item class="staff-create-form-username" label="班级名称">
+              <el-input v-model="editClassObj.name"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-name" label="班级教室">
+              <el-input v-model="editClassObj.classroom"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-name" label="开课时间">
+              <el-date-picker v-model="editClassObj.startDate"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-name" label="结课时间">
+              <el-date-picker v-model="editClassObj.endDate"/>
+            </el-form-item>
+            <el-form-item class="staff-create-form-gender" label="班主任">
+              <el-select v-model="selectedStaffId">
+                <el-option  v-for="headTeacher in headTeacherList" :label="headTeacher.name" :value="headTeacher.id"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item class="staff-create-form-btn-group">
+              <div class="btn-group">
+                <el-button type="primary" style="width: 150px; height: 40px;" @click="editClass">确认</el-button>
+                <el-button type="info" style="width: 150px; height: 40px;" @click="editDialogVisible = false">取消
                 </el-button>
               </div>
             </el-form-item>
@@ -206,6 +243,11 @@ const createClassObj: Class = reactive(new Class());
 // 选中的职员 id
 const selectedStaffId: Ref<number | undefined> = ref();
 
+// 编辑班级信息窗口是否打开
+const editDialogVisible: Ref<boolean> = ref(false);
+// 编辑班级信息的对象
+const editClassObj: Class = reactive(new Class());
+
 // 删除班级信息窗口是否打开
 const deleteDialogVisible: Ref<boolean> = ref(false);
 // 删除的班级对象
@@ -215,15 +257,23 @@ onMounted(() => {
   getClassList();
 });
 
-// 打开新建课程窗口
+// 打开新建班级窗口
 const openCreateDialog = (): void => {
+  getHeadTeacherList();
   selectedStaffId.value = undefined;
   // 重置 createClassObj
   createClassObj.setUndefined();
-  getHeadTeacherList();
   createDialogVisible.value = true;
 }
-// 打开删除课程窗口
+// 打开编辑班级的窗口
+const openEditDialog = (class_: Class): void => {
+  getHeadTeacherList();
+  selectedStaffId.value = class_.headTeacher?.id;
+  // 设置 editClassObj
+  editClassObj.setValue(class_);
+  editDialogVisible.value = true;
+}
+// 打开删除班级窗口
 const openDeleteDialog = (class_: Class): void => {
   deleteClassObj.setValue(class_);
   deleteDialogVisible.value = true;
@@ -295,6 +345,41 @@ const createClass = async (): Promise<void> => {
           console.log("新建班级信息成功");
         } else {
           console.log("新建班级信息失败, 信息: ", result.get("msg") as string);
+        }
+      })
+}
+
+// 更新班级数据
+const editClass = async (): Promise<void> => {
+  // 填充默认信息
+  createClassObj.updateAt = new Date();
+  // 填充班主任信息
+  headTeacherList.forEach((headTeacher: Staff) => {
+    if (headTeacher.id === selectedStaffId.value) {
+      editClassObj.headTeacher = headTeacher;
+    }
+  })
+  // 向后端请求
+  await SpringAPI.updateClass(token.value, userId.value, username.value, editClassObj)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 更新成功
+          classList.forEach((class_: Class) => {
+            if (class_.id === editClassObj.id) {
+              // 设置值
+              class_.name = editClassObj.name;
+              class_.classroom = editClassObj.classroom;
+              class_.startDate = editClassObj.startDate;
+              class_.endDate = editClassObj.endDate;
+              class_.headTeacher = editClassObj.headTeacher;
+              class_.createAt = editClassObj.createAt;
+              class_.updateAt = editClassObj.updateAt;
+            }
+          })
+          console.log("更新班级数据成功");
+          editDialogVisible.value = false;
+        } else {
+          console.log("更新班级数据失败, 信息: ", result.get("msg") as string);
         }
       })
 }
