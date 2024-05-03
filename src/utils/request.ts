@@ -487,6 +487,35 @@ export default class SpringAPI {
     }
 
     /**
+     * 根据部分学生信息模糊查询
+     *
+     * @param token         用户 jwt 登录凭证
+     * @param id            用户 id
+     * @param username      用户名
+     * @param studentLike   部分学生信息
+     * @returns 符合条件的学生信息列表
+     */
+    public static searchStudentLike = async (token: string, id: number, username:string, studentLike: Student): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map<string, Object>();
+
+        await axios.post(this.url + '/student/search', JSON.stringify(studentLike), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((response: AxiosResponse<Array<Student>>) => {
+                resultMap.set("code", 0);
+                resultMap.set("studentList", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            });
+        return resultMap;
+    }
+
+    /**
      * 新建学生信息
      *
      * @param token     用户 jwt 登录凭证

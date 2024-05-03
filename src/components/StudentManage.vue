@@ -5,25 +5,28 @@
     </div>
     <div class="search-group">
       <!-- 查询学员的表单 -->
-      <el-form :inline="true" style="width: 100%; display: flex; justify-content: flex-start;">
-        <el-form-item label="学员姓名" class="student-name-container">
-          <el-input style="width: 180px; height: 35px;"/>
+      <el-form :inline="true" style="width: 100%; display: flex; justify-content: flex-start;" :model="searchForm"
+               ref="searchFormRef">
+        <el-form-item label="学员姓名" class="student-name-container" prop="name">
+          <el-input style="width: 180px; height: 35px;" v-model="searchForm.name" clearable/>
         </el-form-item>
 
-        <el-form-item label="学号" class="student-time-container">
-          <el-input style="width: 180px; height: 35px;"/>
+        <el-form-item label="学号" class="student-time-container" prop="stuNumber">
+          <el-input style="width: 180px; height: 35px;" v-model="searchForm.stuNumber" clearable/>
         </el-form-item>
 
-        <el-form-item label="最高学历" class="student-degree-container">
-          <el-select style="width: 180px; height: 35px;"/>
+        <el-form-item label="最高学历" class="student-degree-container" prop="degree">
+          <el-select style="width: 180px; height: 35px;" v-model="searchForm.degree" clearable/>
         </el-form-item>
 
-        <el-form-item label="所属班级" class="student-class-container">
-          <el-select style="width: 180px; height: 35px;"/>
+        <el-form-item label="所属班级" class="student-class-container" prop="classId">
+          <el-select style="width: 180px; height: 35px;" v-model="searchForm.classId" clearable>
+            <el-option v-for="item in classList" :key="item.id" :label="item.name" :value="item.id"/>
+          </el-select>
         </el-form-item>
 
         <el-form-item class="search-btn-container">
-          <el-button type="primary" class="search-btn">查询</el-button>
+          <el-button type="info" class="search-btn" @click="reset(searchFormRef)">清空</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -47,29 +50,29 @@
       </el-button>
     </div>
     <div class="student-table-container">
-      <el-table stripe style="width: 100%" class="student-table" :data="studentList">
+      <el-table stripe  class="student-table" :data="listInTable">
         <el-table-column type="selection" width="55"/>
-        <el-table-column fixed="left" prop="name" label="姓名" width="170"/>
-        <el-table-column prop="stuNumber" label="学号" width="170"/>
-        <el-table-column prop="class" label="班级" width="170">
+        <el-table-column fixed="left" prop="name" label="姓名" width="100"/>
+        <el-table-column prop="stuNumber" label="学号" width="150"/>
+        <el-table-column prop="class" label="班级" width="150">
           <template #default="scope">
             <p>{{ scope.row.class_.name }}</p>
           </template>
         </el-table-column>
-        <el-table-column prop="gender" label="性别" width="170">
+        <el-table-column prop="gender" label="性别" width="80">
           <template #default="scope">
             <p>{{ scope.row.gender === 1 ? "男" : "女" }}</p>
           </template>
         </el-table-column>
-        <el-table-column prop="phone" label="手机号" width="170"/>
-        <el-table-column prop="degree" label="最高学历" width="170">
+        <el-table-column prop="phone" label="手机号" width="150"/>
+        <el-table-column prop="degree" label="最高学历" width="100">
           <template #default="scope">
             <p>{{ scope.row.degree === 1 ? "本科" : "大专" }}</p>
           </template>
         </el-table-column>
-        <el-table-column prop="breakCount" label="违纪次数" width="170"/>
-        <el-table-column prop="minus" label="违纪扣分" width="170"/>
-        <el-table-column prop="updatedAt" label="最后操作时间" width="170">
+        <el-table-column prop="breakCount" label="违纪次数" width="100"/>
+        <el-table-column prop="minus" label="违纪扣分" width="100"/>
+        <el-table-column prop="updatedAt" label="最后操作时间" width="120">
           <template #default="scope">
             <p>{{ new Date(scope.row.updateAt).toLocaleDateString() }}</p>
           </template>
@@ -194,13 +197,47 @@
 
 <script setup lang="ts">
 import {Plus, Minus} from '@element-plus/icons-vue';
-import {Ref, reactive, ref, ComputedRef, computed, onMounted} from 'vue';
+import {Ref, reactive, ref, ComputedRef, computed, onMounted, watch} from 'vue';
 import Student from '../types/student';
 import {Store, useStore} from "vuex";
 import SpringAPI from "../utils/request.ts";
+import Class from "../types/class.ts";
+import {FormInstance} from "element-plus";
+
+// 查询表单
+const searchForm: {
+  name: string | undefined,
+  stuNumber: string | undefined,
+  degree: number | undefined,
+  classId: number | undefined
+} = reactive({
+  name: undefined,
+  stuNumber: undefined,
+  degree: undefined,
+  classId: undefined
+});
+
+watch(searchForm, () => {
+  // 根据 classId 查询课程
+  const student: Student = new Student();
+  student.name = searchForm.name;
+  student.stuNumber = searchForm.stuNumber;
+  student.degree = searchForm.degree;
+
+  student.class_ = (classList.filter((class_: Class) => {
+    return class_.id === searchForm.classId
+  }))[0]
+  searchStudentLike(student);
+})
+
+// 选中的班级对象
+const selectedClassId: Ref<number> = ref<number>(-1);
 
 // 学生信息列表
 const studentList: Array<Student> = reactive<Array<Student>>([]);
+
+// 班级列表
+const classList: Array<Class> = reactive<Array<Class>>([]);
 
 // 表格上展示的信息列表
 const listInTable: ComputedRef<Array<Student>> = computed(() => {
@@ -211,6 +248,9 @@ const listInTable: ComputedRef<Array<Student>> = computed(() => {
 
 // 用户全局状态
 const store: Store<any> = useStore();
+
+// 表单控制器
+const searchFormRef: Ref<FormInstance> = ref<FormInstance>();
 
 // 每页展示的信息条数
 const pageNumber: Ref<string> = ref('10');
@@ -243,12 +283,19 @@ const editDialogVisible: Ref<boolean> = ref(false);
 const editStudent: Student = reactive<Student>(new Student());
 
 onMounted(() => {
+  getClassList();
   getStudentList();
 })
 
 // 打开新建学生信息窗口
 const openCreateDialog = (): void => {
   createDialogVisible.value = true;
+}
+
+// 重置表单
+const reset = (formEl: FormInstance | undefined): void => {
+  if (!formEl) return;
+  formEl.resetFields();
 }
 
 // 获取学生信息列表
@@ -264,6 +311,42 @@ const getStudentList = (): void => {
           console.log("获取学生信息列表成功, 数据: ", studentList);
         } else {
           console.log("获取学生信息列表失败, 信息: ", result.get("msg") as string);
+        }
+      })
+}
+
+// 根据部分信息模糊查询
+const searchStudentLike = (student: Student): void => {
+  studentList.splice(0);
+  SpringAPI.searchStudentLike(token.value, userId.value, username.value, student)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 模糊查询成功
+          const studentList_: Array<Student> = result.get("studentList") as Array<Student>;
+          console.log("result", result);
+          studentList_.forEach((student: Student) => {
+            studentList.push(student);
+          })
+          console.log("模糊查询成功");
+        } else {
+          console.log("模糊查询失败, 信息: ", result.get("msg") as string);
+        }
+      })
+}
+
+// 获取班级信息列表
+const getClassList = (): void => {
+  SpringAPI.getClassList(token.value, userId.value, username.value)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 获取信息成功
+          const classList_: Array<Class> = result.get("classes");
+          classList_.forEach((class_: Class) => {
+            classList.push(class_);
+          })
+          console.log("获取班级信息成功, 列表: ", classList);
+        } else {
+          console.log("获取班级信息失败, 信息: ", result.get("msg"));
         }
       })
 }
@@ -328,6 +411,7 @@ const getStudentList = (): void => {
   display: flex;
   justify-content: flex-start;
   height: 80vh;
+  width: 100%;
 }
 
 .page-configuration {
