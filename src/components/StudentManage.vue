@@ -82,7 +82,7 @@
             <el-button link type="primary" size="small" @click="openEditDialog(scope.row)">
               编辑
             </el-button>
-            <el-button link type="primary" size="small">
+            <el-button link type="primary" size="small" @click="openMinusDialog(scope.row)">
               违纪
             </el-button>
             <el-button link type="primary" size="small" @click="openDeleteDialog(scope.row)">
@@ -189,7 +189,7 @@
             <el-form-item class="student-edit-form-btn-group">
               <div class="btn-group">
                 <el-button type="primary" style="width: 150px; height: 40px;" @click="updateStudent">确认</el-button>
-                <el-button type="info" style="width: 150px; height: 40px;">取消</el-button>
+                <el-button type="info" style="width: 150px; height: 40px;" @click="editDialogVisible = false">取消</el-button>
               </div>
             </el-form-item>
           </el-form>
@@ -214,6 +214,26 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- 学员扣分弹窗 -->
+    <el-dialog v-model="minusDialogVisible" width="800" draggable>
+      <div class="delete-dialog-layout">
+        <div class="student-delete-title-container">
+          <p class="student-delete-title">学员违纪处理</p>
+        </div>
+        <div class="student-delete-form-container">
+          <el-form>
+            <el-form-item label="违纪扣分">
+              <el-input v-model="minusPoint"/>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div class="student-delete-dialog-btn">
+          <el-button type="primary" style="width: 150px; height: 40px;" @click="minusPointExec">确认</el-button>
+          <el-button type="info" style="width: 150px; height: 40px;" @click="deleteDialogVisible = false">取消</el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -225,7 +245,6 @@ import {Store, useStore} from "vuex";
 import SpringAPI from "../utils/request.ts";
 import Class from "../types/class.ts";
 import {FormInstance} from "element-plus";
-import {setStatesFlag} from "echarts/types/src/util/states";
 
 // 查询表单
 const searchForm: {
@@ -314,6 +333,13 @@ const studentListToDelete: Array<Student> = reactive<Array<Student>>([]);
 // 选中的学生列表
 const selectedStudentList: Ref<Array<Student>> = ref<Array<Student>>([]);
 
+// 扣分窗口是否打开
+const minusDialogVisible: Ref<boolean> = ref(false);
+// 被扣分的基本信息
+const minusStudent: Student = reactive<Student>(new Student());
+// 违纪扣分的分数
+const minusPoint: Ref<string | undefined> = ref(undefined);
+
 onMounted(() => {
   getClassList();
   getStudentList();
@@ -331,6 +357,13 @@ const openEditDialog = (student: Student): void => {
   selectedClassId.value = student.class_?.id;
   editStudent.setValue(student);
   editDialogVisible.value = true;
+}
+
+// 打开违纪窗口
+const openMinusDialog = (student: Student): void => {
+  minusPoint.value = undefined;
+  minusStudent.setValue(student);
+  minusDialogVisible.value = true;
 }
 
 // 打开删除学员信息窗口
@@ -437,6 +470,31 @@ const updateStudent = (): void => {
           editDialogVisible.value = false;
         } else {
           console.log("更新学员信息失败, 信息: ", result.get("msg") as string);
+        }
+      })
+}
+
+// 学员扣分
+const minusPointExec = (): void => {
+  // 计算分数
+  minusStudent.breakCount++;
+  minusStudent.minus += Number(minusPoint.value);
+  minusStudent.updateAt = new Date();
+  SpringAPI.updateStudent(token.value, userId.value, username.value, minusStudent)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 更新成功
+          studentList.forEach((student: Student) => {
+            if (student.id === minusStudent.id) {
+              student.breakCount = minusStudent.breakCount;
+              student.minus = minusStudent.minus;
+              student.updateAt = minusStudent.updateAt;
+            }
+          })
+          console.log("学员违纪记录成功");
+          minusDialogVisible.value = false;
+        } else {
+          console.log("学员违纪记录失败, 信息: ", result.get("msg") as string);
         }
       })
 }
