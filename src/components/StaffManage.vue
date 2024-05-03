@@ -519,7 +519,6 @@ const deleteStaff = async (): void => {
   selectedStaffList.value.forEach((staff_: Staff) => {
     staffListToDelete.push(staff_);
   });
-  console.log(staffListToDelete);
   SpringAPI.deleteStaff(token.value, userId.value, username.value, staffListToDelete)
       .then((result: Map<string, Object>) => {
         if (result.get("code") === 0) {
