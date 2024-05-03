@@ -78,8 +78,8 @@
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="170">
-          <template #default>
-            <el-button link type="primary" size="small">
+          <template #default="scope">
+            <el-button link type="primary" size="small" @click="openEditDialog(scope.row)">
               编辑
             </el-button>
             <el-button link type="primary" size="small">
@@ -152,11 +152,11 @@
       </div>
     </el-dialog>
 
-    <!-- 编辑员工信息弹窗 -->
+    <!-- 编辑学员信息弹窗 -->
     <el-dialog v-model="editDialogVisible" width="800" draggable>
       <div class="edit-dialog-layout">
         <div class="student-edit-title-container">
-          <p class="student-edit-title">编辑员工信息</p>
+          <p class="student-edit-title">编辑学员信息</p>
         </div>
         <div class="student-edit-form-container">
           <el-form class="student-edit-form" label-position="right" label-width="auto">
@@ -182,11 +182,13 @@
               </el-select>
             </el-form-item>
             <el-form-item class="student-edit-form-class" label="所属班级">
-              <el-select v-model="editStudent.class_"/>
+              <el-select v-model="selectedClassId">
+                <el-option v-for="item in classList" :key="item.id" :label="item.name" :value="item.id" />
+              </el-select>
             </el-form-item>
             <el-form-item class="student-edit-form-btn-group">
               <div class="btn-group">
-                <el-button type="primary" style="width: 150px; height: 40px;" @click="createStudent">创建</el-button>
+                <el-button type="primary" style="width: 150px; height: 40px;" @click="updateStudent">确认</el-button>
                 <el-button type="info" style="width: 150px; height: 40px;">取消</el-button>
               </div>
             </el-form-item>
@@ -303,12 +305,15 @@ onMounted(() => {
 
 // 打开新建学生信息窗口
 const openCreateDialog = (): void => {
+  selectedClassId.value = undefined;
   newStudent.setUndefined();
   createDialogVisible.value = true;
 }
 
 // 打开编辑学生信息窗口
-const openEditDialog = (): void => {
+const openEditDialog = (student: Student): void => {
+  selectedClassId.value = student.class_?.id;
+  editStudent.setValue(student);
   editDialogVisible.value = true;
 }
 
@@ -374,6 +379,35 @@ const createStudent = (): void => {
           createDialogVisible.value = false;
         } else {
           console.log("新建学生信息失败, 信息: ", result.get("msg") as string);
+        }
+      })
+}
+
+// 更改学生信息
+const updateStudent = (): void => {
+  // 填充默认值
+  // TODO 优化循环选择：使用filter选择
+  editStudent.class_ = (classList.filter((class_: Class) => { return class_.id === selectedClassId.value }))[0];
+  editStudent.updateAt = new Date();
+  SpringAPI.updateStudent(token.value, userId.value, username.value, editStudent)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 更新成功
+          studentList.forEach((student: Student) => {
+            if (student.id === editStudent.id) {
+              student.name = editStudent.name;
+              student.stuNumber = editStudent.stuNumber;
+              student.class_ = editStudent.class_;
+              student.gender = editStudent.gender;
+              student.phone = editStudent.phone;
+              student.degree = editStudent.degree;
+              student.updateAt = editStudent.updateAt;
+            }
+          })
+          console.log("更新学员信息成功");
+          editDialogVisible.value = false;
+        } else {
+          console.log("更新学员信息失败, 信息: ", result.get("msg") as string);
         }
       })
 }
