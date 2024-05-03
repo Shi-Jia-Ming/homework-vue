@@ -218,19 +218,19 @@
     <!-- 学员扣分弹窗 -->
     <el-dialog v-model="minusDialogVisible" width="800" draggable>
       <div class="delete-dialog-layout">
-        <div class="student-delete-title-container">
-          <p class="student-delete-title">学员违纪处理</p>
+        <div class="student-minus-title-container">
+          <p class="student-minus-title">学员违纪处理</p>
         </div>
-        <div class="student-delete-form-container">
+        <div class="student-minus-form-container">
           <el-form>
-            <el-form-item label="违纪扣分">
-              <el-input v-model="minusPoint"/>
+            <el-form-item label="违纪扣分" style="width: 600px;" class="minus-input-container">
+              <el-input v-model="minusPoint" style="height: 35px;"/>
             </el-form-item>
           </el-form>
         </div>
-        <div class="student-delete-dialog-btn">
+        <div class="student-minus-dialog-btn">
           <el-button type="primary" style="width: 150px; height: 40px;" @click="minusPointExec">确认</el-button>
-          <el-button type="info" style="width: 150px; height: 40px;" @click="deleteDialogVisible = false">取消</el-button>
+          <el-button type="info" style="width: 150px; height: 40px;" @click="minusDialogVisible = false">取消</el-button>
         </div>
       </div>
     </el-dialog>
@@ -551,12 +551,20 @@ const getClassList = (): void => {
   height: calc(100% - 56px);
 }
 
+.student-edit-title-container,
+.student-delete-title-container,
+.student-minus-title-container,
+.student-create-title-container,
 .student-manage-title-container {
   display: flex;
   border-left: 6px #1da8ed solid;
   height: 35px;
 }
 
+.student-create-title,
+.student-minus-title,
+.student-edit-title,
+.student-delete-title,
 .student-manage-title {
   align-self: center;
   margin-left: 15px;
@@ -621,5 +629,76 @@ const getClassList = (): void => {
 
 .pagination {
   margin-left: 20px;
+}
+
+.student-edit-form-container,
+.student-create-form-container {
+  align-self: center;
+  padding: 30px 20px;
+}
+
+.student-create-form-name,
+.student-create-form-stu-number,
+.student-create-form-gender,
+.student-create-form-phone,
+.student-create-form-class,
+.student-create-form-degree,
+.student-edit-form-name,
+.student-edit-form-stu-number,
+.student-edit-form-gender,
+.student-edit-form-phone,
+.student-edit-form-class,
+.student-edit-form-degree {
+  margin: 20px 0;
+}
+
+.student-edit-form-btn-group,
+.student-create-form-btn-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  margin: 40px 0 0 0;
+  width: 100%;
+}
+
+.btn-group {
+  display: flex;
+  justify-content: space-around;
+  width: 75%;
+  margin: auto;
+}
+
+.minus-dialog-layout,
+.delete-dialog-layout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.student-minus-form-container,
+.student-delete-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: large;
+}
+.student-minus-dialog-btn,
+.student-delete-dialog-btn {
+  align-self: center;
+  display: flex;
+  justify-content: space-around;
+  width: 75%;
+  margin-bottom: 30px;
+}
+
+.minus-input-container {
+  width: 600px;
+  align-self: center;
+}
+
+.el-form-item__label {
+  font-size: 16px;
 }
 </style>
