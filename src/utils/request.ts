@@ -459,6 +459,148 @@ export default class SpringAPI {
     }
 
     /**
+     * 获取学生信息
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @returns 学生信息列表
+     */
+    public static getStudentList = async (token: string, id: number, username: string): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map<string, Object>();
+
+        await axios.get(this.url + '/student/getAll', {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((response: AxiosResponse<Array<Student>>) => {
+                resultMap.set("code", 0);
+                resultMap.set("studentList", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            });
+        return resultMap;
+    }
+
+    /**
+     * 根据部分学生信息模糊查询
+     *
+     * @param token         用户 jwt 登录凭证
+     * @param id            用户 id
+     * @param username      用户名
+     * @param studentLike   部分学生信息
+     * @returns 符合条件的学生信息列表
+     */
+    public static searchStudentLike = async (token: string, id: number, username:string, studentLike: Student): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map<string, Object>();
+
+        await axios.post(this.url + '/student/search', JSON.stringify(studentLike), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((response: AxiosResponse<Array<Student>>) => {
+                resultMap.set("code", 0);
+                resultMap.set("studentList", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            });
+        return resultMap;
+    }
+
+    /**
+     * 新建学生信息
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param newStudent 新的学生信息
+     * @returns 新数据的 id
+     */
+    public static createStudent = async (token: string, id: number, username: string, newStudent: Student): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map<string, Object>();
+
+        await axios.post(this.url + '/student/create', JSON.stringify(newStudent), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((response: AxiosResponse<number>) => {
+                resultMap.set("code", 0);
+                resultMap.set("studentId", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("coed", 1);
+                resultMap.set("msg", error.response?.data!);
+            });
+        return resultMap;
+    }
+
+    /**
+     * 更新学生信息
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param newStudent 新的学生信息
+     * @returns 更新状态
+     */
+    public static updateStudent = async (token: string, id: number, username: string, newStudent: Student): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map<string, Object>();
+
+        await axios.post(this.url + '/student/update', JSON.stringify(newStudent), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((_response: AxiosResponse<string>) => {
+                resultMap.set("code", 0);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            });
+        return resultMap;
+    }
+
+    /**
+     * 删除学生信息
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param studentList 待删除的学生列表
+     * @returns 删除状态
+     */
+    public static deleteStudent = async (token: string, id: number, username: string, studentList: Array<Student>): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map<string, Object>();
+
+        await axios.post(this.url + '/student/delete', JSON.stringify(studentList), {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((_response: AxiosResponse<string>) => {
+                resultMap.set("code", 0);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
      * 删除文件
      *
      * @param fileName 待删除的文件名

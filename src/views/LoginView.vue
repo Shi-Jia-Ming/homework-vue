@@ -11,10 +11,10 @@
         <el-form class="login-form" :model="loginForm" label-position="right" label-width="auto" size="large"
           ref="loginFormRef" :rules="rules">
           <el-form-item label="用户名" class="username-item" prop="username" :error="formErrMsg.usernameErr">
-            <el-input class="input" placeholder="请输入员工用户名" v-model="loginForm.username" />
+            <el-input class="input" placeholder="请输入用户名" v-model="loginForm.username" />
           </el-form-item>
           <el-form-item label="密&nbsp; &nbsp; 码" class="password-item" prop="password" :error="formErrMsg.passwordErr">
-            <el-input class="input" placeholder="作品展示PPT" v-model="loginForm.password" />
+            <el-input class="input" placeholder="请输入密码" v-model="loginForm.password" />
           </el-form-item>
           <el-form-item class="btn-group-item">
             <div class="btn-group">

@@ -31,6 +31,7 @@ export default class Student {
         this.stuNumber = student.stuNumber;
         this.class_ = student.class_;
         this.gender = student.gender;
+        this.degree = student.degree;
         this.phone = student.phone;
         this.breakCount = student.breakCount;
         this.minus = student.minus;
