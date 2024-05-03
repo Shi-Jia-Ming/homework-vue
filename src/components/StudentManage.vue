@@ -40,7 +40,7 @@
         </template>
       </el-button>
 
-      <el-button type="primary" class="add-btn">
+      <el-button type="primary" class="add-btn" @click="openDeleteDialog">
         <template #icon>
           <el-icon :size="15" style="margin-right: 5px;">
             <minus/>
@@ -50,7 +50,7 @@
       </el-button>
     </div>
     <div class="student-table-container">
-      <el-table stripe  class="student-table" :data="listInTable">
+      <el-table stripe  class="student-table" :data="listInTable" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55"/>
         <el-table-column fixed="left" prop="name" label="姓名" width="100"/>
         <el-table-column prop="stuNumber" label="学号" width="150"/>
@@ -85,7 +85,7 @@
             <el-button link type="primary" size="small">
               违纪
             </el-button>
-            <el-button link type="primary" size="small">
+            <el-button link type="primary" size="small" @click="openDeleteDialog(scope.row)">
               删除
             </el-button>
           </template>
@@ -199,7 +199,20 @@
 
     <!-- 删除学生信息弹窗 -->
     <el-dialog v-model="deleteDialogVisible" width="800" draggable>
-
+      <div class="delete-dialog-layout">
+        <div class="student-delete-title-container">
+          <p class="student-delete-title">删除学员信息</p>
+        </div>
+        <div class="student-delete-form-container">
+          <div class="student-name-input-container">
+            <span class="student-name-input-label">您确定要删除该学员信息吗？</span>
+          </div>
+        </div>
+        <div class="student-delete-dialog-btn">
+          <el-button type="primary" style="width: 150px; height: 40px;" @click="deleteStudent">确认</el-button>
+          <el-button type="info" style="width: 150px; height: 40px;" @click="deleteDialogVisible = false">取消</el-button>
+        </div>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -212,6 +225,7 @@ import {Store, useStore} from "vuex";
 import SpringAPI from "../utils/request.ts";
 import Class from "../types/class.ts";
 import {FormInstance} from "element-plus";
+import {setStatesFlag} from "echarts/types/src/util/states";
 
 // 查询表单
 const searchForm: {
@@ -296,7 +310,9 @@ const deleteDialogVisible: Ref<boolean> = ref(false);
 // 删除学生的基本信息
 const studentToDelete: Student = reactive<Student>(new Student());
 // 删除的学生列表
-const studentListToDelete: Student = reactive<Array<Student>([]);
+const studentListToDelete: Array<Student> = reactive<Array<Student>>([]);
+// 选中的学生列表
+const selectedStudentList: Ref<Array<Student>> = ref<Array<Student>>([]);
 
 onMounted(() => {
   getClassList();
@@ -317,10 +333,23 @@ const openEditDialog = (student: Student): void => {
   editDialogVisible.value = true;
 }
 
+// 打开删除学员信息窗口
+const openDeleteDialog = (student: Student | undefined): void => {
+  if (student !== undefined) {
+    studentToDelete.setValue(student);
+  }
+  deleteDialogVisible.value = true;
+}
+
 // 重置表单
 const reset = (formEl: FormInstance | undefined): void => {
   if (!formEl) return;
   formEl.resetFields();
+}
+
+// 表格选择更新回调
+const handleSelectionChange = (selected: Student[]): void => {
+  selectedStudentList.value = selected;
 }
 
 // 获取学生信息列表
@@ -408,6 +437,32 @@ const updateStudent = (): void => {
           editDialogVisible.value = false;
         } else {
           console.log("更新学员信息失败, 信息: ", result.get("msg") as string);
+        }
+      })
+}
+
+// 删除学员信息
+const deleteStudent = async (): Promise<void> => {
+  // 清空列表消息
+  studentListToDelete.splice(0);
+  studentListToDelete.push(studentToDelete);
+  selectedStudentList.value.forEach((student: Student) => {
+    studentListToDelete.push(student);
+  });
+  await SpringAPI.deleteStudent(token.value, userId.value, username.value, studentListToDelete)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          studentListToDelete.forEach((studentToDel: Student) => {
+            studentList.forEach((studentInTable: Student) => {
+              if (studentInTable.id === studentToDel.id) {
+                studentList.splice(studentList.indexOf(studentInTable), 1);
+              }
+            })
+          })
+          deleteDialogVisible.value = false;
+          console.log("删除员工信息成功");
+        } else {
+          console.log("删除员工信息失败, 信息: ", result.get("msg") as string);
         }
       })
 }

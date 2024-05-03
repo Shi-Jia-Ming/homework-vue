@@ -578,13 +578,13 @@ export default class SpringAPI {
      * @param token     用户 jwt 登录凭证
      * @param id        用户 id
      * @param username  用户名
-     * @param student   待删除的学生信息
+     * @param studentList 待删除的学生列表
      * @returns 删除状态
      */
-    public static deleteStudent = async (token: string, id: number, username: string, student: Student): Promise<Map<string, Object>> => {
+    public static deleteStudent = async (token: string, id: number, username: string, studentList: Array<Student>): Promise<Map<string, Object>> => {
         const resultMap: Map<string, Object> = new Map<string, Object>();
 
-        await axios.post(this.url + '/student/delete', JSON.stringify(student), {
+        await axios.post(this.url + '/student/delete', JSON.stringify(studentList), {
             headers: {
                 'Token': token,
                 'User-Id': id,
