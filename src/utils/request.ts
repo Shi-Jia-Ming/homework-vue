@@ -186,7 +186,7 @@ export default class SpringAPI {
     public static getHeadTeacher = async (token: string, id: number, username: string): Promise<Map<string, Object>> => {
         const resultMap: Map<string, Object> = new Map();
 
-        await axios.get(this.url + 'staff/getHeadTeacher', {
+        await axios.get(this.url + '/staff/getHeadTeacher', {
             headers: {
                 'Token': token,
                 'User-Id': id,
@@ -196,6 +196,64 @@ export default class SpringAPI {
             .then((response: AxiosResponse<Array<Staff>>) => {
                 resultMap.set("code", 0);
                 resultMap.set("headTeacherList", response.data);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 获取员工性别数据
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @returns 员工性别数据
+     */
+    public static getStaffGender = async (token: string, id: number, username: string): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.get(this.url + '/staff/getGenderCount', {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username
+            }
+        })
+            .then((response: AxiosResponse<{ "male": number, "female": number }>) => {
+                resultMap.set("code", 0);
+                resultMap.set("maleCount", response.data.male);
+                resultMap.set("femaleCount", response.data.female);
+            }).catch((error: AxiosError) => {
+                resultMap.set("code", 1);
+                resultMap.set("msg", error.response?.data!);
+            })
+        return resultMap;
+    }
+
+    /**
+     * 获取职员职位的数量
+     *
+     * @param token     用户 jwt 登录凭证
+     * @param id        用户 id
+     * @param username  用户名
+     * @param job       员工职位类型
+     */
+    public static getStaffJobCount = async (token: string, id: number, username: string, job: number): Promise<Map<string, Object>> => {
+        const resultMap: Map<string, Object> = new Map();
+
+        await axios.post(this.url + 'staff/getJobCount', { job: job }, {
+            headers: {
+                'Token': token,
+                'User-Id': id,
+                'Username': username,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+            .then((response: AxiosResponse<number>) => {
+                resultMap.set("code", 0);
+                resultMap.set("count", response.data);
             }).catch((error: AxiosError) => {
                 resultMap.set("code", 1);
                 resultMap.set("msg", error.response?.data!);

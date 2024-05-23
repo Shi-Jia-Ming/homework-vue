@@ -27,81 +27,124 @@
 
 <script setup lang="ts">
 import * as echarts from 'echarts';
-import { onMounted } from 'vue';
+import {ComputedRef, onMounted, reactive, computed} from 'vue';
+import SpringAPI from "../utils/request.ts";
+import {useStore, Store} from 'vuex';
 
-onMounted(() => {
-  initPostStatistic();
-  initGenderStatistic();
+// 全局状态管理
+const store: Store<any> = useStore();
+
+// 定义用户信息
+const userId: ComputedRef<number> = computed(() => {
+  return store.state.user.userId
+});
+const token: ComputedRef<string> = computed(() => {
+  return store.state.user.token
+});
+const username: ComputedRef<string> = computed(() => {
+  return store.state.user.username
 });
 
-const initGenderStatistic = (): void => {
-  var chartDom = document.getElementById('gender');
-  var myChart = echarts.init(chartDom);
-  var option;
-
-  option = {
-    title: {
-      text: 'Referer of a Website',
-      subtext: 'Fake Data',
-      left: 'center'
-    },
-    tooltip: {
-      trigger: 'item'
-    },
-    legend: {
-      orient: 'vertical',
-      left: 'left'
-    },
-    series: [
-      {
-        name: 'Access From',
-        type: 'pie',
-        radius: '50%',
-        data: [
-          { value: 1048, name: 'Search Engine' },
-          { value: 735, name: 'Direct' },
-          { value: 580, name: 'Email' },
-          { value: 484, name: 'Union Ads' },
-          { value: 300, name: 'Video Ads' }
-        ],
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
+// 员工性别统计数据
+const genderOption = reactive({
+  title: {
+    left: 'center'
+  },
+  tooltip: {
+    trigger: 'item'
+  },
+  legend: {
+    orient: 'vertical',
+    left: 'left'
+  },
+  series: [
+    {
+      name: '详情',
+      type: 'pie',
+      radius: '50%',
+      data: [
+        { value: 0, name: '男性' },
+        { value: 0, name: '女性' },
+      ],
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
         }
       }
-    ]
-  };
+    }
+  ]
+});
 
-  option && myChart.setOption(option);
+// 员工职位数据统计
+const jobOption = reactive({
+  xAxis: {
+    type: 'category',
+    data: ['班主任', '讲师', '学工主管', '教研主管', '咨询师']
+  },
+  yAxis: {
+    type: 'value'
+  },
+  series: [
+    {
+      name: '详情',
+      data: [0, 0, 0, 0, 0],
+      type: 'bar'
+    }
+  ],
+  emphasis: {
+    itemStyle: {
+      shadowBlur: 10,
+      shadowOffsetX: 0,
+      shadowColor: 'rgba(0, 0, 0, 0.5)'
+    }
+  }
+});
+
+onMounted(async () => {
+  await initPostStatistic();
+  await initGenderStatistic();
+});
+
+const initGenderStatistic = async (): void => {
+  const chartDom = document.getElementById('gender');
+  const myChart = echarts.init(chartDom);
+
+  await SpringAPI.getStaffGender(token.value, userId.value, username.value)
+      .then((result: Map<string, Object>) => {
+        if (result.get("code") === 0) {
+          // 设置数据
+          genderOption.series[0].data[0].value = result.get("maleCount") as number;
+          genderOption.series[0].data[1].value = result.get("femaleCount") as number;
+          console.log("员工性别信息渲染成功");
+        } else {
+          console.log("员工性别信息渲染失败, 信息: ", result.get("msg") as string);
+        }
+      })
+
+  genderOption && myChart.setOption(genderOption);
 }
 
-const initPostStatistic = (): void => {
-  type EChartsOption = echarts.EChartsOption;
+const initPostStatistic = async (): void => {
+  const chartDom = document.getElementById('post');
+  const myChart = echarts.init(chartDom);
 
-  var chartDom = document.getElementById('post');
-  var myChart = echarts.init(chartDom);
-  var option: EChartsOption;
+  for (let i = 1; i <= jobOption.xAxis.data.length; ++i) {
+    await SpringAPI.getStaffJobCount(token.value, userId.value, username.value, i)
+        .then((result: Map<string, Object>) => {
+          if (result.get("code") === 0) {
+            jobOption.series[0].data[i - 1] = result.get("count") as number;
+          } else {
+            console.log("员工职位信息渲染失败, 信息: ", result.get("msg") as string);
+          }
+        })
+  }
 
-  option = {
-    xAxis: {
-      type: 'category',
-      data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    },
-    yAxis: {
-      type: 'value'
-    },
-    series: [
-      {
-        data: [120, 200, 150, 80, 70, 110, 130],
-        type: 'bar'
-      }
-    ]
-  };
+  console.log(jobOption);
+  console.log("员工职位信息渲染成功");
 
-  option && myChart.setOption(option);
+  jobOption && myChart.setOption(jobOption);
 }
 </script>
 
