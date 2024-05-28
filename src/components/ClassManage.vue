@@ -7,12 +7,12 @@
       <!-- 查询班级的表单 -->
       <el-form :inline="true" style="width: 100%; display: flex; justify-content: flex-start;" :model="searchForm" ref="searchFormRef">
         <el-form-item label="班级名称" class="class-name-container" prop="name">
-          <el-input style="width: 200px; height: 35px;" v-model="searchForm.name"/>
+          <el-input style="width: 200px; height: 35px;" v-model="searchForm.name" clearable/>
         </el-form-item>
 
         <el-form-item label="结课时间" class="class-time-container" prop="startDate">
           <el-date-picker type="daterange" range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间"
-                          style="width: 200px; height: 35px;" v-model="searchForm.date"/>
+                          style="width: 200px; height: 35px;" v-model="searchForm.date" clearable/>
         </el-form-item>
 
         <el-form-item class="search-btn-container" prop="endDate">
